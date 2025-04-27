@@ -1,0 +1,1 @@
+from ollama_adk_deploy import agent
