@@ -4,9 +4,12 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 
-# Import the OSB agent entrypoint and descriptor
 from osb_agent_app.agent import run_llm_driven_workflow
 from osb_agent_app.agent_descriptor import AGENT_DESCRIPTOR
+from osb_agent_app.gemini_client import initialize_gemini_client
+
+# Initialize the Gemini client
+gemini_client = initialize_gemini_client()
 
 app = FastAPI(title="Open Study Builder MCP")
 
@@ -18,16 +21,13 @@ AGENT_HANDLERS = {
     }
 }
 
-
 class MCPRequest(BaseModel):
     agent: str
     user_input: str
 
-
 class MCPResponse(BaseModel):
     status: str
     results: Any
-
 
 @app.get("/mcp/agents/{agent}", response_model=Dict[str, Any])
 async def get_agent_descriptor(agent: str):
@@ -38,7 +38,6 @@ async def get_agent_descriptor(agent: str):
     if not entry:
         raise HTTPException(status_code=404, detail="Agent not found")
     return entry["descriptor"]
-
 
 @app.post("/mcp/run", response_model=MCPResponse)
 async def mcp_run(req: MCPRequest):
