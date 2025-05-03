@@ -2,11 +2,7 @@
 
 import os
 from typing import List
-import openai
 
-# Ensure your API key is set in the environment:
-# export OPENAI_API_KEY="your_key"
-openai.api_key = os.getenv("OPENAI_API_KEY", "")
 
 # List of supported high-level goals
 AVAILABLE_TASKS = [

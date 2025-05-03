@@ -1,7 +1,7 @@
 # osb_agent_app/task_planner.py
 
 from typing import List
-from planner_rules import PLANNER_RULES, TASK_DEPENDENCIES
+from .planner_rules import PLANNER_RULES, TASK_DEPENDENCIES
 
 class TaskPlanner:
     """

@@ -3,7 +3,7 @@
 import time
 import requests
 from requests.exceptions import HTTPError
-from task_steps import (
+from .task_steps import (
     create_study,
     create_study_arms,
     create_epochs,
@@ -33,7 +33,7 @@ class TaskExecutor:
             "fetch_element_control_terminology": fetch_element_control_terminology,
         }
 
-    def execute(self, tasks: List[str]) -> List[dict]:
+    def execute(self, tasks: list[str]) -> list[dict]:
         context = {}
         results = []
         for t in tasks:

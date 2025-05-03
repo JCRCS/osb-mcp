@@ -1,8 +1,8 @@
 # osb_agent_app/agent.py
 
-from goal_generator_llm import GoalGeneratorLLM
-from task_planner import TaskPlanner
-from task_executor import TaskExecutor
+from .goal_generator_llm import GoalGeneratorLLM
+from .task_planner import TaskPlanner
+from .task_executor import TaskExecutor
 
 def run_llm_driven_workflow(user_request: str):
     """
