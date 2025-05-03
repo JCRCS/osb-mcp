@@ -11,7 +11,7 @@ from google.adk.agents.llm_agent import LlmAgent
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
-from google.genai import types
+from google.generativeai import types
 
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
