@@ -3,6 +3,8 @@
 import os
 from typing import List, Dict
 from .gemini_client import initialize_gemini_client
+import markdown
+from bs4 import BeautifulSoup
 
 # List of supported high-level goals with descriptions
 AVAILABLE_TASKS = [
@@ -19,6 +21,14 @@ AVAILABLE_TASKS = [
         "fetch_element_control_terminology",
     ]
 ]
+
+
+
+def extract_code_from_markdown(markdown_text: str) -> str:
+    html = markdown.markdown(markdown_text, extensions=["fenced_code"])
+    soup = BeautifulSoup(html, "html.parser")
+    code_block = soup.find("code")
+    return code_block.text.strip() if code_block else markdown_text.strip()
 
 class GoalGeneratorLLM:
     """
@@ -65,7 +75,7 @@ class GoalGeneratorLLM:
         response = self.client.generate_content(prompt
         )
         # Parse the response content
-        content = response.text.strip()
+        content = extract_code_from_markdown(response.text.strip())
         # Safely evaluate the returned Python list
         try:
             goals = eval(content)
