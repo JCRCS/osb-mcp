@@ -1,10 +1,10 @@
-# osb_agent_app/goal_generator_llm.py
+### File: osb_agent_app/goal_generator_llm.py
 
 import os
-from typing import List
+from typing import List, Dict
+from .gemini_client import initialize_gemini_client
 
-
-# List of supported high-level goals
+# List of supported high-level goals with descriptions
 AVAILABLE_TASKS = [
     {"name": k, "description": f"Perform the goal '{k}'."}
     for k in [
@@ -22,29 +22,54 @@ AVAILABLE_TASKS = [
 
 class GoalGeneratorLLM:
     """
-    Uses GPT-4 to map a free-form user request into an ordered list of
-    high-level goal names, constrained to AVAILABLE_TASKS.
+    Wrapper around a language model (Gemini) to map a free-form user request
+    into an ordered list of high-level goal names, constrained to AVAILABLE_TASKS.
     """
-    def __init__(self, model: str = "gpt-4"):
-        self.model = model
+    def __init__(
+        self,
+        api_key: str = None,
+        model: str = None,
+        temperature: float = 0,
+    ):
+        dict(os.environ)
+        # Initialize Gemini client
+        self.client = initialize_gemini_client(
+            api_key=api_key or os.getenv("GEMINI_API_KEY"),
+            model=model or os.getenv("GEMINI_MODEL", "gemini-pro")
+        )
+        self.temperature = temperature
 
     def generate_goals(self, user_request: str) -> List[str]:
-        task_list = "\n".join([f"- {t['name']}: {t['description']}" for t in AVAILABLE_TASKS])
-        prompt = f"""
-You are an assistant that maps user requests into orchestrator goals.
+        """
+        Generate an ordered list of goal names based on a free-form user request.
 
-Here are the supported goals:
-{task_list}
+        Args:
+            user_request (str): The user's natural language request.
 
-User request: "{user_request}"
-
-Return a Python list of goal names in execution order. No extra text.
-"""
-        resp = openai.ChatCompletion.create(
-            model=self.model,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0
+        Returns:
+            List[str]: Ordered list of goal names matching AVAILABLE_TASKS.
+        """
+        # Build the prompt including task list
+        task_lines = "".join([
+            f"- {t['name']}: {t['description']}" for t in AVAILABLE_TASKS
+        ])
+        prompt = (
+            "You are an assistant that maps user requests into orchestrator goals. "
+            "Here are the supported goals:"
+            f"{task_lines}"
+            f"User request: \"{user_request}\""
+            "Return a Python list of goal names in execution order. No extra text."
         )
-        # The model should return something like: ["create_study", "create_study_arms", ...]
-        goals = eval(resp.choices[0].message["content"].strip())
+
+        # Call Gemini
+        response = self.client.generate_content(prompt
+        )
+        # Parse the response content
+        content = response.text.strip()
+        # Safely evaluate the returned Python list
+        try:
+            goals = eval(content)
+        except Exception:
+            raise ValueError(f"Unable to parse goals list: {content}")
         return goals
+

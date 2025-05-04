@@ -1,11 +1,14 @@
 # osb_agent_app/gemini_client.py
 
 import os
-from google import generativeai
+import google.generativeai as genai
 
-def initialize_gemini_client():
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
-        raise EnvironmentError("GEMINI_API_KEY environment variable not set.")
-    generativeai.configure(api_key=api_key)
-    return generativeai
+def initialize_gemini_client(api_key, model ):
+
+    # 1️⃣ Configure with your API key
+    genai.configure(api_key=api_key)
+
+    # 2️⃣ Instantiate the Gemini‑Pro model
+    llm = genai.GenerativeModel(model)
+
+    return llm

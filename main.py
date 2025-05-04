@@ -9,7 +9,7 @@ from osb_agent_app.agent_descriptor import AGENT_DESCRIPTOR
 from osb_agent_app.gemini_client import initialize_gemini_client
 
 # Initialize the Gemini client
-gemini_client = initialize_gemini_client()
+# gemini_client = initialize_gemini_client()
 
 app = FastAPI(title="Open Study Builder MCP")
 
