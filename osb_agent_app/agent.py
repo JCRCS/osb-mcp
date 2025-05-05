@@ -18,10 +18,11 @@ def run_llm_driven_workflow(user_request: str):
     # 2) Plan with dependencies
     planner = TaskPlanner()
     plan = planner.plan(goals)
+    return plan
 
-    # 3) Execute tasks
-    executor = TaskExecutor()
-    return executor.execute(plan)
+    # # 3) Execute tasks
+    # executor = TaskExecutor()
+    # return executor.execute(plan)
 
 if __name__ == "__main__":
     import pprint

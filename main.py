@@ -39,11 +39,11 @@ async def get_agent_descriptor(agent: str):
         raise HTTPException(status_code=404, detail="Agent not found")
     return entry["descriptor"]
 
-@app.post("/mcp/run", response_model=MCPResponse)
+@app.post("/mcp/plan", response_model=MCPResponse)
 async def mcp_run(req: MCPRequest):
     """
     Invokes the specified agent with the user_input.
-    Returns the step-by-step execution results.
+    Returns the step-by-step plan.
     """
     entry = AGENT_HANDLERS.get(req.agent)
     if not entry:
