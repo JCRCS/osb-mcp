@@ -14,7 +14,6 @@ PLANNER_RULES = {
 
     "fetch_arm_control_terminology": ["fetch_arm_control_terminology"],
     "fetch_epoch_control_terminology": ["fetch_epoch_control_terminology"],
-    "fetch_branch_arm_control_terminology": ["fetch_branch_arm_control_terminology"],
     "fetch_element_control_terminology": ["fetch_element_control_terminology"],
 }
 
@@ -28,6 +27,39 @@ TASK_DEPENDENCIES = {
     # Each fetch must wait for its corresponding create
     "fetch_arm_control_terminology": ["create_study_arms"],
     "fetch_epoch_control_terminology": ["create_epochs"],
-    "fetch_branch_arm_control_terminology": ["create_branch_arms"],
     "fetch_element_control_terminology": ["create_elements"],
 }
+
+def requires_create_study(context):
+    """
+    Determines whether 'create_study' should be added based on the context.
+    """
+    return not context.get("study_uid")
+
+
+def get_task_dependencies(task_name, context):
+    """
+    Returns dependencies for a given task based on the current context.
+    """
+    dependencies = []
+    requires_create_study_bool = requires_create_study(context)
+
+    if task_name in ["create_study_arms","create_epochs","create_branch_arms","create_elements"]:
+        if requires_create_study_bool:
+            dependencies.append("create_study")
+        dependencies.append("fetch_arm_control_terminology")
+
+    if task_name == "create_epochs":
+        dependencies.append("fetch_epoch_control_terminology")
+        dependencies.append("fetch_epoch_type_control_terminology")
+        dependencies.append("fetch_epoch_subtype_control_terminology")
+
+    if task_name == "create_elements":
+        dependencies.append("fetch_element_control_terminology")
+    
+    if task_name == "create_branch_arms":
+        dependencies.append("create_study_arms")
+
+
+    # Add other task dependency logic here
+    return dependencies

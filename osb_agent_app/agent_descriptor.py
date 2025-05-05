@@ -9,6 +9,7 @@ AGENT_DESCRIPTOR = {
     "description": "Designs clinical trials: studies, arms, epochs, elements, and fetches control terminology.",
     "tools": [
         {"name": "create_study", "description": "Creates a new clinical study record."},
+        {"name": "get_study", "description": "Get the study by the study_uid"},
         {"name": "create_study_arms", "description": "Adds study arms to a study."},
         {"name": "create_epochs", "description": "Defines study epochs."},
         {"name": "create_branch_arms", "description": "Defines branch arms for arms."},

@@ -5,6 +5,7 @@ from typing import List, Dict
 from .gemini_client import initialize_gemini_client
 import markdown
 from bs4 import BeautifulSoup
+from .planner_rules import get_task_dependencies
 
 # List of supported high-level goals with descriptions
 AVAILABLE_TASKS = [
@@ -83,3 +84,11 @@ class GoalGeneratorLLM:
             raise ValueError(f"Unable to parse goals list: {content}")
         return goals
 
+
+def generate_task_plan(context):
+    task_plan = []
+    task_name = "study_arm"
+    dependencies = get_task_dependencies(task_name, context)
+    task_plan.extend(dependencies)
+    task_plan.append(task_name)
+    return task_plan
