@@ -1,0 +1,8 @@
+[project]
+name = "osb-mcp"
+version = "0.1.0"
+description = "A starter Open Study Builder MCP project"
+authors = [{ name = "Juan Carlos Rosito", email = "juancarlosrosito@outlook.com" }]
+requires-python = ">=3.13"
+
+[tool.uv]

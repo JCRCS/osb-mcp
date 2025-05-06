@@ -30,64 +30,64 @@ from pydantic import Field, PrivateAttr
 from google.adk.models import BaseLlm
 from typing import Any, Dict
 
-class LiteLlmWrapper(BaseLlm):
-    model: str = Field(..., description="The model name")
-    litellm_params: Dict[str, Any] = Field(..., description="Additional parameters to configure the LLM")
+# class LiteLlmWrapper(BaseLlm):
+#     model: str = Field(..., description="The model name")
+#     litellm_params: Dict[str, Any] = Field(..., description="Additional parameters to configure the LLM")
 
-    # Define private attribute
-    _lite_llm = PrivateAttr()
+#     # Define private attribute
+#     _lite_llm = PrivateAttr()
 
-    def __init__(self, lite_llm, litellm_params: Dict[str, Any] = None):
-        super().__init__(model=lite_llm.model)
-        self._lite_llm = lite_llm
-        self.litellm_params = litellm_params or {}
+#     def __init__(self, lite_llm, litellm_params: Dict[str, Any] = None):
+#         super().__init__(model=lite_llm.model)
+#         self._lite_llm = lite_llm
+#         self.litellm_params = litellm_params or {}
 
-    async def __aiter__(self):
-        """Initialize the asynchronous iterator."""
-        # Optionally, store initial state, such as the request or configuration
-        self._llm_request = None  # Or set this based on your configuration
-        return self
+#     async def __aiter__(self):
+#         """Initialize the asynchronous iterator."""
+#         # Optionally, store initial state, such as the request or configuration
+#         self._llm_request = None  # Or set this based on your configuration
+#         return self
 
-    async def __anext__(self):
-        """Return the next item for the asynchronous iteration."""
-        if self._llm_request is None:
-            # Initialize the request on the first call to __anext__()
-            self._llm_request = {"messages": [{"role": "user", "content": "Your request here"}]}  # Example request
+#     async def __anext__(self):
+#         """Return the next item for the asynchronous iteration."""
+#         if self._llm_request is None:
+#             # Initialize the request on the first call to __anext__()
+#             self._llm_request = {"messages": [{"role": "user", "content": "Your request here"}]}  # Example request
 
-        # Use the generate_content_async method to get content, possibly streaming in chunks
-        async for content in self.generate_content_async(self._llm_request['messages']):
-            return content
+#         # Use the generate_content_async method to get content, possibly streaming in chunks
+#         async for content in self.generate_content_async(self._llm_request['messages']):
+#             return content
 
-    async def generate_content_async(self, messages, tools=None, **kwargs):
-        """Async method to generate content, yielding multiple responses (as an iterable)."""
+#     async def generate_content_async(self, messages, tools=None, **kwargs):
+#         """Async method to generate content, yielding multiple responses (as an iterable)."""
         
-        # Determine the provider (e.g., OpenAI)
-        provider = self.litellm_params.get("messages_provider", "openai")
+#         # Determine the provider (e.g., OpenAI)
+#         provider = self.litellm_params.get("messages_provider", "openai")
         
-        completion_kwargs = {}
-        if tools:
-            completion_kwargs["tools"] = tools
-        completion_kwargs.update(kwargs)
+#         completion_kwargs = {}
+#         if tools:
+#             completion_kwargs["tools"] = tools
+#         completion_kwargs.update(kwargs)
         
-        # Based on provider, adjust how messages are handled (e.g., OpenAI vs other services)
-        if provider == "openai":
-            response = await self._lite_llm.acompletion(messages=messages, **completion_kwargs)
-        else:
-            # Handle other providers here (if applicable)
-            response = await self._lite_llm.acompletion(messages=messages, **completion_kwargs)
+#         # Based on provider, adjust how messages are handled (e.g., OpenAI vs other services)
+#         if provider == "openai":
+#             response = await self._lite_llm.acompletion(messages=messages, **completion_kwargs)
+#         else:
+#             # Handle other providers here (if applicable)
+#             response = await self._lite_llm.acompletion(messages=messages, **completion_kwargs)
         
-        # Check if there are multiple choices (e.g., for streaming purposes)
-        choices = response.get("choices", [])
-        if choices:
-            for choice in choices:
-                content = choice["message"]["content"]
-                if content:
-                    yield content  # Yield the content to make this an iterable
+#         # Check if there are multiple choices (e.g., for streaming purposes)
+#         choices = response.get("choices", [])
+#         if choices:
+#             for choice in choices:
+#                 content = choice["message"]["content"]
+#                 if content:
+#                     yield content  # Yield the content to make this an iterable
 
-        # If no content found, raise StopAsyncIteration (or return if needed)
-        raise StopAsyncIteration
+#         # If no content found, raise StopAsyncIteration (or return if needed)
+#         raise StopAsyncIteration
 
-ollama_model = LiteLlm(model="ollama/llama3.2:1B", litellm_params={"messages_provider": "openai"} )
+# ollama_model = LiteLlm(model="ollama/llama3.2:1B", litellm_params={"messages_provider": "openai"} )
 
 
 
