@@ -39,7 +39,7 @@ async def create_open_study_builder_agent():
         model = ollama_model3,
         name="open_study_builder_agent",
         instruction=(
-            "Help the user interact with the OpenStudyBuilder API via the available tools."
+            "Help the user interact with the OpenStudyBuilder API via the available tools. If the user request multiple things make a plan of the tasks"
         ),
         tools=tools,
     )
@@ -58,7 +58,7 @@ root_instruction = (
 
 root_agent = Agent(
     name="root_agent",
-    model=ollama_model4,
+    model=ollama_model3,
     instruction=root_instruction,
     description="Coordinator agent for OpenStudyBuilder agent.",
     tools=[],

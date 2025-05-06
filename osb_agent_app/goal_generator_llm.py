@@ -9,18 +9,16 @@ from .planner_rules import get_task_dependencies
 
 # List of supported high-level goals with descriptions
 AVAILABLE_TASKS = [
-    {"name": k, "description": f"Perform the goal '{k}'."}
-    for k in [
-        "create_study",
-        "create_study_arms",
-        "create_epochs",
-        "create_branch_arms",
-        "create_elements",
-        "fetch_arm_control_terminology",
-        "fetch_epoch_control_terminology",
-        "fetch_branch_arm_control_terminology",
-        "fetch_element_control_terminology",
-    ]
+    {"name": "get_studies", "description": "look for the existent studies, to check uniqueness"},
+    {"name": "create_study", "description": "Perform the task of creating 1 'create_study'."},
+    {"name": "create_study_arm", "description": "Perform the task of creating 1 'create_study_arm'."},
+    {"name": "create_epoch", "description": "Perform the task of creating 1 'create_epoch'."},
+    {"name": "create_branch_arm", "description": "Perform the task of creating 1 'create_branch_arm'."},
+    {"name": "create_element", "description": "Perform the task of creating 1 'create_element'."},
+    {"name": "fetch_arm_control_terminology", "description": "Perform the task 'fetch_arm_control_terminology'."},
+    {"name": "fetch_epoch_control_terminology", "description": "Perform the task 'fetch_epoch_control_terminology'."},
+    {"name": "fetch_branch_arm_control_terminology", "description": "Perform the task 'fetch_branch_arm_control_terminology'."},
+    {"name": "fetch_element_control_terminology", "description": "Perform the task 'fetch_element_control_terminology'."},
 ]
 
 
@@ -45,9 +43,11 @@ class GoalGeneratorLLM:
         dict(os.environ)
         # Initialize Gemini client
         self.client = initialize_gemini_client(
-            api_key=api_key or os.getenv("GEMINI_API_KEY"),
-            model=model or os.getenv("GEMINI_MODEL", "gemini-pro")
+            api_key="AIzaSyA2u2kMshtxpRYcnoyuazH8rxYSVQnGT9A",#api_key or os.getenv("GEMINI_API_KEY"),
+            model="gemini-2.0-flash-exp"#"gemini-2.0-flash-exp"#"gemini-2.5-pro-exp-03-25"#model or os.getenv("GEMINI_MODEL", "gemini-pro")
         )
+        print("printing all teh keys of envrionment ")
+        print(os.getenv("GEMINI_API_KEY"),os.getenv("GEMINI_MODEL", "gemini-pro") )
         self.temperature = temperature
 
     def generate_goals(self, user_request: str) -> List[str]:
@@ -58,18 +58,19 @@ class GoalGeneratorLLM:
             user_request (str): The user's natural language request.
 
         Returns:
-            List[str]: Ordered list of goal names matching AVAILABLE_TASKS.
+            List[str]: Ordered list of goal names matching AVAILABLE_TASKS. Each task creates one item, list multiple times if there's the need of creating many. 
         """
         # Build the prompt including task list
         task_lines = "".join([
-            f"- {t['name']}: {t['description']}" for t in AVAILABLE_TASKS
+            f"- {t['name']}: {t['description']}\n"
+            for t in AVAILABLE_TASKS
         ])
         prompt = (
-            "You are an assistant that maps user requests into orchestrator goals. "
-            "Here are the supported goals:"
+            "You are an assistant that maps user requests into orchestrator tasks, if the user ask for multiple items repeat the task. "
+            "Here are the supported tasks, if multiple items of the same to be create repeat the task:"
             f"{task_lines}"
             f"User request: \"{user_request}\""
-            "Return a Python list of goal names in execution order. No extra text."
+            "Return a Python list of taks names in execution order. No extra text. Each task creates one item, list multiple times if there's the need of creating many. "
         )
 
         # Call Gemini
@@ -84,6 +85,7 @@ class GoalGeneratorLLM:
             raise ValueError(f"Unable to parse goals list: {content}")
         return goals
 
+# goal_generator_llm.py
 
 def generate_task_plan(context):
     task_plan = []

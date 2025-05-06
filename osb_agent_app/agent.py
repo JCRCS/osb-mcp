@@ -11,6 +11,7 @@ def run_llm_driven_workflow(user_request: str):
      2) Graph planner → ordered atomic tasks
      3) Executor → runs task_steps
     """
+    print("entering into goal generator ----->> ")
     # 1) Parse user into goals
     goal_gen = GoalGeneratorLLM()
     goals = goal_gen.generate_goals(user_request)
