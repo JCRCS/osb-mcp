@@ -15,6 +15,9 @@ from google.generativeai import types
 
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
+from google.adk.tools import google_search
+# from google.adk.models import GoogleGeminiModel
+
 
 
 
@@ -26,6 +29,69 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 
 ollama_model4=os.getenv("GEMINI_MODEL", "gemini-2.5-pro-exp-03-25")
 ollama_model3="gemini-2.0-flash-exp"
+
+# google_search_agent = Agent(
+#     name="search_agent",
+#     model=ollama_model4,       # ← model string, not a class
+#     instruction="Use Google Search to answer the user.",
+#     tools=[google_search],         # assuming you imported google_search
+# )
+# for public API:
+# google_search = google_search(api_key="YOUR_API_KEY", cx="YOUR_CSE_ID")
+
+# async def google_search_builder_agent():
+#     """Fetches MCP tools and returns an LlmAgent for OpenStudyBuilder API."""
+#     google_search_agent = LlmAgent(
+#         # model=,
+#         model = ollama_model3,
+#         name="search_agent",
+#         instruction="Use Google Search to answer the user.",
+#         tools=['google_search'],
+#     )
+#     return google_search_agent, osb_exit_stack
+
+# google_search_agent, google_search_exit_stack = asyncio.run(google_search_builder_agent())
+
+
+# <script async src="https://cse.google.com/cse.js?cx=SEARCH_ENGINE_ID">
+# </script>
+# <div class="gcse-search"></div>
+
+import os
+import asyncio
+from google.adk.agents.llm_agent import LlmAgent
+from google.adk.runners import Runner
+from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
+
+async def create_google_search_agent():
+    # tools, exit_stack = await MCPToolset.from_server(
+    #     connection_params=StdioServerParameters(
+    #         command='node',  # or 'python'
+    #         args=['mcp-google-search-server.js'],  # or your Python server entry
+    #     )
+    # )
+    tools, exit_stack = await MCPToolset.from_server(
+    connection_params=StdioServerParameters(
+        command="uv",
+        args=["run" ,"./mcp_google_search_server.py"],
+    ))
+    google_search_agent = LlmAgent(model="gemini-2.5-pro-preview-03-25",
+                     name="google_search_agent",
+                     tools=tools)
+    return google_search_agent, exit_stack
+    # runner = Runner(agent)
+    # print("Running agent. You can ask it to search Google.")
+    # await runner.run()
+    # exit_stack.close()
+google_search_agent, google_search_exit_stack = asyncio.run(create_google_search_agent())
+
+
+# tools, exit_stack = await MCPToolset.from_server(
+#     connection_params=StdioServerParameters(
+#         command='python',
+#         args=['example_agent/mcp_google_search_server.py']
+#     )
+# )
 
 async def create_open_study_builder_agent():
     """Fetches MCP tools and returns an LlmAgent for OpenStudyBuilder API."""
@@ -39,7 +105,7 @@ async def create_open_study_builder_agent():
         model = ollama_model3,
         name="open_study_builder_agent",
         instruction=(
-            "Help the user interact with the OpenStudyBuilder API via the available tools. If the user request multiple things make a plan of the tasks"
+            "Help the user interact with the OpenStudyBuilder API via the available tools. First call the planner and the use the tools"
         ),
         tools=tools,
     )
@@ -51,6 +117,7 @@ open_study_builder_agent, osb_exit_stack = asyncio.run(create_open_study_builder
 root_instruction = (
     "You are the Root Agent orchestrating sub-agents. "
     "- Delegate studies related queries to osb_agent"
+    "- Delegate google search related queries to google_search_agent"
     "- If unable to handle, respond that you cannot handle the request."
 )
 
@@ -60,9 +127,9 @@ root_agent = Agent(
     name="root_agent",
     model=ollama_model3,
     instruction=root_instruction,
-    description="Coordinator agent for OpenStudyBuilder agent.",
+    description="Coordinator agent for OpenStudyBuilder agent and google search agent.",
     tools=[],
-    sub_agents=[open_study_builder_agent]
+    sub_agents=[open_study_builder_agent, google_search_agent]
 )
 
 # --- Step 4: Set Up Runner and Session ---
@@ -90,4 +157,5 @@ if __name__ == "__main__":
     finally:
         print("Shutting down MCP connections...")
         asyncio.run(osb_exit_stack.aclose())
+        asyncio.run(google_search_exit_stack.aclose())
         print("Shutdown complete.")
