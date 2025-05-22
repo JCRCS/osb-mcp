@@ -5,6 +5,7 @@ from fastapi import Request
 import httpx
 from osb_agent_app.agent import run_llm_driven_workflow
 from mcp.server.fastmcp import FastMCP
+import time
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -16,27 +17,6 @@ OPEN_STUDY_BUILDER_URL = "http://127.0.0.1:9001"  # <- fixed typo here
 # Initialize MCP server
 mcp = FastMCP("OSB-MCP-Server", description="MCP Server providing access to Open Study Builder studies and general API utilities.")
 
-# @mcp.resource("greeting://", description="Retrieve a greeting message from the API Proxy service.")
-# def get_greeting() -> str:
-#     """Returns a greeting message."""
-#     resp = httpx.get(f"{API_URL}/greet")
-#     return resp.json()["message"]
-
-# @mcp.tool(description="Set user information like name and country into the API Proxy service.")
-# def set_info(name: str, country: str) -> dict:
-#     """
-#     Sets user information (name and country) into the proxy API.
-    
-#     Parameters:
-#     - name (str): The user's name.
-#     - country (str): The user's country.
-    
-#     Returns:
-#     - dict: Confirmation and stored info.
-#     """
-#     resp = httpx.post(f"{API_URL}/info", json={"name": name, "country": country})
-#     return resp.json()
-
 @mcp.tool(description="Retrieve a list of studies from the Open Study Builder (OSB) API.")
 def get_studies() -> dict:
     """
@@ -45,10 +25,11 @@ def get_studies() -> dict:
     Returns:
     - dict: A dictionary containing all studies metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies")
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies?page_number=1&page_size=0")
+    time.sleep(7)
     return resp.json()
 
-@mcp.tool(description="""Create a new study in the Open Study Builder (OSB). Check existent studies to generate unique properties
+@mcp.tool(description="""BEFORE creating a study execute GET studies to generate unique properties. Create a new study in the Open Study Builder (OSB). BEFORE GET studies to generate unique properties
           Parameters:
         -   {"project_number": CDISC DEV, 
             "study_acronym": ["string", "Acronym of the study should be unique across studies"]
@@ -57,9 +38,9 @@ def get_studies() -> dict:
 
           
           """)
-def create_study( study_acronym:str, study_number: str) -> dict:
+async def create_study( study_acronym:str, study_number: str) -> dict:
     """
-    Creates a new study inside the Open Study Builder.
+    Before using create_study, get studies to check uniqueness. Creates a new study inside the Open Study Builder.
 
     Parameters:
     -   {"project_number": CDISC DEV, 
@@ -81,6 +62,8 @@ def create_study( study_acronym:str, study_number: str) -> dict:
         "study_acronym": study_acronym, 
         "study_number": study_number
     })
+    # await asyncio.sleep(1000)
+    time.sleep(7)
     return resp.json()
 
 
@@ -93,6 +76,7 @@ def fetch_arm_control_terminology() -> dict:
     - dict: A dictionary containing all arm types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Arm+Type")
+    time.sleep(7)
     return resp.json()
 
 
@@ -128,6 +112,7 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
         "number_of_subjects": number_of_subjects,
         "arm_type_uid": arm_type_uid
     })
+    time.sleep(7)
     return resp.json()
 
 
@@ -139,7 +124,8 @@ def fetch_epoch_control_terminology() -> dict:
     Returns:
     - dict: A dictionary containing all epoch metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Sub+Type")
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/epochs/allowed-configs")
+    time.sleep(7)
     return resp.json()
 
 @mcp.tool(description="Retrieve a list of sub types of epochs from the Open Study Builder (OSB) API.")
@@ -151,10 +137,37 @@ def fetch_epoch_sub_type_control_terminology() -> dict:
     - dict: A dictionary containing all epoch types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Sub+Type")
+    time.sleep(7)
     return resp.json()
 
 
-@mcp.tool(description="Create a new study Epoch in the Open Study Builder (OSB). Me sure that first get the fetch epoch control terminologies to get the epoch type, subtype and epoch")
+@mcp.tool(description="Preview a study Epoch in the Open Study Builder (OSB) so it will generate the needed fields to create an epoch. Me sure that first get the fetch epoch control terminologies to get the subtype")
+def preview_epoch(
+        study_uid,
+        epoch_subtype,) -> dict:
+    """
+    Preview a new study Epoch inside the Open Study Builder.
+
+    Parameters:
+    - study_uid: study where it's the epoch that the user wants to create
+    - study_data (dict): The study epoch to be created. Must follow the Open Study Builder schema.
+    * {
+            "study_uid": "string",
+            "epoch_subtype": "string epoch subtype uid control terminology",
+        }
+
+    Returns:
+    - dict: Information about the newly created study epoch or any error.
+    """
+    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs/preview",json={
+            "study_uid":study_uid,
+            "epoch_subtype":epoch_subtype,
+    })
+    time.sleep(7)
+    return resp.json()
+
+
+@mcp.tool(description="Create a new study Epoch in the Open Study Builder (OSB). Me sure that first get the preview_epoch to get the epoch type, and epoch")
 def create_epoch(
         study_uid,
         start_rule,
@@ -200,6 +213,7 @@ def create_epoch(
             "duration":duration,
             "color_hash":color_hash,
     })
+    time.sleep(7)
     return resp.json()
 
 
@@ -212,6 +226,7 @@ def fetch_element_control_terminology() -> dict:
     - dict: A dictionary containing all element types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Element+Type")
+    time.sleep(7)
     return resp.json()
 
 
@@ -256,6 +271,7 @@ def create_element(study_uid,
         "element_colour": element_colour,
         "element_subtype_uid": element_subtype_uid,
     })
+    time.sleep(7)
     return resp.json()
 
 
@@ -295,6 +311,7 @@ def create_design_cell(study_uid,
         "transition_rule":  transition_rule,
         "order": order,
     })
+    time.sleep(7)
     return resp.json()
 
 @mcp.tool(description="""
@@ -305,21 +322,10 @@ def mcp_plan(user_request: str) -> dict:
     Takes the user_request.
     Returns the step-by-step plan List.
     """
-    # entry = AGENT_HANDLERS.get(req.agent)
-    # if not entry:
-    #     raise HTTPException(status_code=404, detail="Agent not found")
-
     # Execute the agent’s workflow
     results = run_llm_driven_workflow(user_request)
+    time.sleep(7)
     return results#.json()
-
-# @mcp.resource("country://{name}", description="Get the country associated with a specific user name from the API Proxy service.")
-# def get_country(name: str) -> str:
-#     """Returns the country associated with a given user name."""
-#     resp = httpx.get(f"{API_URL}/country/{name}")
-#     if resp.status_code == 404:
-#         return f"No info for {name}"
-#     return resp.json()["country"]
 
 # Server startup logging
 logging.info("Starting OSB FastMCP Server via STDIO...")

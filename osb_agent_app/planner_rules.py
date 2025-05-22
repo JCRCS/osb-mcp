@@ -10,8 +10,10 @@ PLANNER_RULES = {
     "create_study": ["create_study"],
     "create_study_arm": ["create_study_arm"],
     "create_epoch": ["create_epoch"],
-    "create_branch_arm": ["create_branch_arm"],
+    "preview_epoch": ["preview_epoch"],
+    # "create_branch_arm": ["create_branch_arm"],
     "create_element": ["create_element"],
+    "create_design_cell": ["create_design_cell"],
 
     "fetch_arm_control_terminology": ["fetch_arm_control_terminology"],
     "fetch_epoch_control_terminology": ["fetch_epoch_control_terminology"],
@@ -22,8 +24,8 @@ PLANNER_RULES = {
 TASK_DEPENDENCIES = {
     "create_study":["get_studies"],
     "create_study_arm": ["create_study","fetch_arm_control_terminology"],
-    "create_epoch": ["create_study", "fetch_epoch_control_terminology"],
-    "create_branch_arm": ["create_study_arm"],
+    "preview_epoch": ["create_study", "fetch_epoch_control_terminology"],
+    "create_epoch": ["create_study", "fetch_epoch_control_terminology","preview_epoch"],
     "create_element": ["create_study", "fetch_element_control_terminology"],
 
     # Each fetch must wait for its corresponding create

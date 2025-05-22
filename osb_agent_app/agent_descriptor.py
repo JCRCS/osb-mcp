@@ -10,13 +10,13 @@ AGENT_DESCRIPTOR = {
     "tools": [
         {"name": "create_study", "description": "Creates a new clinical study record."},
         {"name": "get_study", "description": "Get the study by the study_uid"},
-        {"name": "create_study_arms", "description": "Adds study arms to a study."},
-        {"name": "create_epochs", "description": "Defines study epochs."},
-        {"name": "create_branch_arms", "description": "Defines branch arms for arms."},
-        {"name": "create_elements", "description": "Adds elements to a study."},
+        {"name": "create_study_arm", "description": "Adds study arms to a study."},
+        {"name": "preview_epoch", "description": "Defines study epochs."},
+        {"name": "create_epoch", "description": "Defines study epochs."},
+        {"name": "create_design_cell", "description": "Defines study Design Cells."},
+        {"name": "create_element", "description": "Adds elements to a study."},
         {"name": "fetch_arm_control_terminology", "description": "Retrieves control terminology for arms."},
         {"name": "fetch_epoch_control_terminology", "description": "Retrieves control terminology for epochs."},
-        {"name": "fetch_branch_arm_control_terminology", "description": "Retrieves control terminology for branch arms."},
         {"name": "fetch_element_control_terminology", "description": "Retrieves control terminology for elements."},
     ]
 }
