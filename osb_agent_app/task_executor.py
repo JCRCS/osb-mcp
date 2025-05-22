@@ -5,13 +5,14 @@ import requests
 from requests.exceptions import HTTPError
 from .task_steps import (
     create_study,
-    create_study_arms,
-    create_epochs,
-    create_branch_arms,
-    create_elements,
+    create_study_arm,
+    preview_epoch,
+    create_epoch,
+    # create_branch_arms,
+    create_element,
     fetch_arm_control_terminology,
     fetch_epoch_control_terminology,
-    fetch_branch_arm_control_terminology,
+    # fetch_branch_arm_control_terminology,
     fetch_element_control_terminology,
 )
 
@@ -23,13 +24,14 @@ class TaskExecutor:
     def __init__(self):
         self.steps = {
             "create_study": create_study,
-            "create_study_arms": create_study_arms,
-            "create_epochs": create_epochs,
-            "create_branch_arms": create_branch_arms,
-            "create_elements": create_elements,
+            "create_study_arm": create_study_arm,
+            "preview_epoch": preview_epoch,
+            "create_epoch": create_epoch,
+            # "create_branch_arms": create_branch_arms,
+            "create_element": create_element,
             "fetch_arm_control_terminology": fetch_arm_control_terminology,
             "fetch_epoch_control_terminology": fetch_epoch_control_terminology,
-            "fetch_branch_arm_control_terminology": fetch_branch_arm_control_terminology,
+            # "fetch_branch_arm_control_terminology": fetch_branch_arm_control_terminology,
             "fetch_element_control_terminology": fetch_element_control_terminology,
         }
 

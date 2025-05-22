@@ -13,11 +13,12 @@ AVAILABLE_TASKS = [
     {"name": "create_study", "description": "Perform the task of creating 1 'create_study'."},
     {"name": "create_study_arm", "description": "Perform the task of creating 1 'create_study_arm'."},
     {"name": "create_epoch", "description": "Perform the task of creating 1 'create_epoch'."},
-    {"name": "create_branch_arm", "description": "Perform the task of creating 1 'create_branch_arm'."},
+    {"name": "preview_epoch", "description": "fills the needed data to perform the creation of the epoch Perform the task preview 1 'preview_epoch'."},
+    # {"name": "create_branch_arm", "description": "Perform the task of creating 1 'create_branch_arm'."},
     {"name": "create_element", "description": "Perform the task of creating 1 'create_element'."},
     {"name": "fetch_arm_control_terminology", "description": "Perform the task 'fetch_arm_control_terminology'."},
     {"name": "fetch_epoch_control_terminology", "description": "Perform the task 'fetch_epoch_control_terminology'."},
-    {"name": "fetch_branch_arm_control_terminology", "description": "Perform the task 'fetch_branch_arm_control_terminology'."},
+    # {"name": "fetch_branch_arm_control_terminology", "description": "Perform the task 'fetch_branch_arm_control_terminology'."},
     {"name": "fetch_element_control_terminology", "description": "Perform the task 'fetch_element_control_terminology'."},
 ]
 
