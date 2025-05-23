@@ -1,0 +1,24 @@
+# Core dependencies
+python-dotenv>=0.19.0
+requests>=2.26.0
+
+# Google ADK related
+google-adk>=1.0.0
+google-api-python-client>=2.0.0
+google-auth>=2.0.0
+google-auth-oauthlib>=0.4.0
+google-auth-httplib2>=0.1.0
+
+# Agent framework
+langchain>=0.0.267
+openai>=0.27.0
+
+# Utility libraries
+pydantic>=1.8.0
+typing-extensions>=4.0.0
+tqdm>=4.62.0
+loguru>=0.6.0
+
+# Web interface (if applicable)
+fastapi>=0.68.0
+uvicorn>=0.15.0
