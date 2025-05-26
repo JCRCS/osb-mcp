@@ -80,7 +80,7 @@ def fetch_arm_control_terminology() -> dict:
     return resp.json()
 
 
-@mcp.tool(description="Create a new study Arm in the Open Study Builder (OSB). Me sure that first get the fetch_arm_control_terminology to get the arm types")
+@mcp.tool(description="Create a new study Arm in the Open Study Builder (OSB). Be sure that first get the fetch_arm_control_terminology to get the arm types")
 def create_arm(study_uid, name, short_name, code, description, color, randomization_group, number_of_subjects, arm_type_uid, study_arm_data: dict) -> dict:
     """
     Creates a new study Arm inside the Open Study Builder.
@@ -167,7 +167,7 @@ def preview_epoch(
     return resp.json()
 
 
-@mcp.tool(description="Create a new study Epoch in the Open Study Builder (OSB). Me sure that first get the preview_epoch to get the epoch type, and epoch")
+@mcp.tool(description="Create a new study Epoch in the Open Study Builder (OSB). Be sure that first get the preview_epoch to get the epoch type, and epoch")
 def create_epoch(
         study_uid,
         start_rule,

@@ -11,7 +11,6 @@ PLANNER_RULES = {
     "create_study_arm": ["create_study_arm"],
     "create_epoch": ["create_epoch"],
     "preview_epoch": ["preview_epoch"],
-    # "create_branch_arm": ["create_branch_arm"],
     "create_element": ["create_element"],
     "create_design_cell": ["create_design_cell"],
 
@@ -28,10 +27,6 @@ TASK_DEPENDENCIES = {
     "create_epoch": ["create_study", "fetch_epoch_control_terminology","preview_epoch"],
     "create_element": ["create_study", "fetch_element_control_terminology"],
 
-    # Each fetch must wait for its corresponding create
-    # "fetch_arm_control_terminology": [],
-    # "fetch_epoch_control_terminology": [],
-    # "fetch_element_control_terminology": [],
 }
 
 def requires_create_study(context):
