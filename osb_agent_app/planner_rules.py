@@ -10,12 +10,18 @@ PLANNER_RULES = {
     "create_study": ["create_study"],
     "create_study_arm": ["create_study_arm"],
     "create_epoch": ["create_epoch"],
+    "create_study_activity": ["create_study_activity"],
+    "get_study_activity": ["get_study_activity"],
     "preview_epoch": ["preview_epoch"],
     "create_element": ["create_element"],
     "create_design_cell": ["create_design_cell"],
 
     "fetch_arm_control_terminology": ["fetch_arm_control_terminology"],
     "fetch_epoch_control_terminology": ["fetch_epoch_control_terminology"],
+    "fetch_activity_type_terminology": ["fetch_activity_type_terminology"],
+    "fetch_activity_group_control_terminology": ["fetch_activity_group_control_terminology"],
+    "fetch_activity_sub_group_control_terminology": ["fetch_activity_sub_group_control_terminology"],
+    "fetch_soa_group_control_terminology": ["fetch_soa_group_control_terminology"],
     "fetch_element_control_terminology": ["fetch_element_control_terminology"],
 }
 
@@ -25,6 +31,14 @@ TASK_DEPENDENCIES = {
     "create_study_arm": ["create_study","fetch_arm_control_terminology"],
     "preview_epoch": ["create_study", "fetch_epoch_control_terminology"],
     "create_epoch": ["create_study", "fetch_epoch_control_terminology","preview_epoch"],
+    "create_study_activity": [
+        "create_study",
+        "fetch_activity_type_terminology",
+        "fetch_activity_group_control_terminology",
+        "fetch_activity_sub_group_control_terminology",
+        "fetch_soa_group_control_terminology",
+        "get_study_activity",
+    ],
     "create_element": ["create_study", "fetch_element_control_terminology"],
 
 }

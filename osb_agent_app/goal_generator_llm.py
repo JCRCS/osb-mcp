@@ -20,6 +20,12 @@ AVAILABLE_TASKS = [
     {"name": "fetch_epoch_control_terminology", "description": "Perform the task 'fetch_epoch_control_terminology'."},
     # {"name": "fetch_branch_arm_control_terminology", "description": "Perform the task 'fetch_branch_arm_control_terminology'."},
     {"name": "fetch_element_control_terminology", "description": "Perform the task 'fetch_element_control_terminology'."},
+    {"name": "fetch_activity_type_terminology", "description": "Retrieves control terminology for activity type."},
+    {"name": "fetch_activity_group_control_terminology", "description": "Retrieves control terminology for activity groups."},
+    {"name": "fetch_activity_sub_group_control_terminology", "description": "Retrieves control terminology for actviity sub groups."},
+    {"name": "fetch_soa_group_control_terminology", "description": "Retrieves control terminology for activity schedule of activities groups."},
+    {"name": "create_study_activity", "description": "Defines study activities."},
+    {"name": "get_study_activity", "description": "get study activities to check uniqueness."},
 ]
 
 

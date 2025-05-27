@@ -16,6 +16,16 @@ def create_epoch(context: dict) -> dict:
     epochs = [{"epoch_id": "E1"}]
     return {"epochs": epochs}
 
+def create_study_activity(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+
+def fetch_study_activity(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+
 def preview_epoch(context: dict) -> dict:
     study = context.get("study", {})
     epochs = [{"epoch_id": "E1"}]
@@ -43,3 +53,19 @@ def fetch_epoch_control_terminology(context: dict) -> dict:
 
 def fetch_element_control_terminology(context: dict) -> dict:
     return {"element_control_terms": ["Lab", "Visit"]}
+
+
+def fetch_activity_type_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}
+
+
+def fetch_activity_group_control_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}
+
+
+def fetch_activity_sub_group_control_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}
+
+
+def fetch_soa_group_control_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}

@@ -13,7 +13,12 @@ from .task_steps import (
     fetch_arm_control_terminology,
     fetch_epoch_control_terminology,
     # fetch_branch_arm_control_terminology,
-    fetch_element_control_terminology,
+    fetch_element_control_terminology,fetch_activity_type_terminology,fetch_activity_group_control_terminology,
+    fetch_activity_sub_group_control_terminology,
+    fetch_soa_group_control_terminology,
+    fetch_study_activity,
+    create_study_activity,
+
 )
 
 class TaskExecutor:
@@ -27,10 +32,16 @@ class TaskExecutor:
             "create_study_arm": create_study_arm,
             "preview_epoch": preview_epoch,
             "create_epoch": create_epoch,
+            "create_study_activity": create_study_activity,
+            "fetch_study_activity": fetch_study_activity,
             # "create_branch_arms": create_branch_arms,
             "create_element": create_element,
             "fetch_arm_control_terminology": fetch_arm_control_terminology,
             "fetch_epoch_control_terminology": fetch_epoch_control_terminology,
+            "fetch_activity_type_terminology": fetch_activity_type_terminology,
+            "fetch_activity_group_control_terminology": fetch_activity_group_control_terminology,
+            "fetch_activity_sub_group_control_terminology": fetch_activity_sub_group_control_terminology,
+            "fetch_soa_group_control_terminology": fetch_soa_group_control_terminology,
             # "fetch_branch_arm_control_terminology": fetch_branch_arm_control_terminology,
             "fetch_element_control_terminology": fetch_element_control_terminology,
         }
