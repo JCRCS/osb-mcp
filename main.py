@@ -6,11 +6,10 @@ import httpx
 from osb_agent_app.agent import run_llm_driven_workflow
 from mcp.server.fastmcp import FastMCP
 import time
+from config import OPEN_STUDY_BUILDER_URL
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
-
 
 from pydantic import BaseModel, RootModel
 from typing import List
@@ -28,11 +27,6 @@ class RequestItem(BaseModel):
 
 class RequestList(RootModel[List[RequestItem]]):
     pass
-
-
-# API Endpoints
-API_URL = "http://127.0.0.1:9000"
-OPEN_STUDY_BUILDER_URL = "http://127.0.0.1:9001"  # <- fixed typo here
 
 # Initialize MCP server
 mcp = FastMCP("OSB-MCP-Server", description="MCP Server providing access to Open Study Builder studies and general API utilities.")

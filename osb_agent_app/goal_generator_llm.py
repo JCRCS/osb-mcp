@@ -6,6 +6,7 @@ from .gemini_client import initialize_gemini_client
 import markdown
 from bs4 import BeautifulSoup
 from .planner_rules import get_task_dependencies
+from config import GOOGLE_API_KEY, GEMINI_MODEL2
 
 # List of supported high-level goals with descriptions
 AVAILABLE_TASKS = [
@@ -58,8 +59,8 @@ class GoalGeneratorLLM:
         dict(os.environ)
         # Initialize Gemini client
         self.client = initialize_gemini_client(
-            api_key="AIzaSyA2u2kMshtxpRYcnoyuazH8rxYSVQnGT9A",#api_key or os.getenv("GEMINI_API_KEY"),
-            model="gemini-2.0-flash-exp"#"gemini-2.0-flash-exp"#"gemini-2.5-pro-exp-03-25"#model or os.getenv("GEMINI_MODEL", "gemini-pro")
+            api_key=GOOGLE_API_KEY,
+            model=GEMINI_MODEL2
         )
         print("printing all teh keys of envrionment ")
         print(os.getenv("GEMINI_API_KEY"),os.getenv("GEMINI_MODEL", "gemini-pro") )

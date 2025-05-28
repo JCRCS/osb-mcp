@@ -15,9 +15,7 @@ from google.generativeai import types
 
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-from google.adk.tools import google_search
-# from google.adk.models import GoogleGeminiModel
-
+from config import GEMINI_MODEL,GEMINI_MODEL2
 
 
 
@@ -26,9 +24,6 @@ load_dotenv()
 import os
 os.environ["OTEL_PYTHON_CONTEXT"] = "asyncio"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-ollama_model4=os.getenv("GEMINI_MODEL", "gemini-2.5-pro-exp-03-25")
-ollama_model3="gemini-2.0-flash-exp" #""
 
 import os
 import asyncio
@@ -42,7 +37,7 @@ async def create_google_search_agent():
         command="uv",
         args=["run" ,"./mcp_google_search_server.py"],
     ))
-    google_search_agent = LlmAgent(model="gemini-2.5-pro-preview-03-25",
+    google_search_agent = LlmAgent(model=GEMINI_MODEL,
                      name="google_search_agent",
                      tools=tools)
     return google_search_agent, exit_stack
@@ -58,7 +53,27 @@ async def create_open_study_builder_agent():
     tools, osb_exit_stack = await MCPToolset.from_server(connection_params=server_params)
     osb_agent = LlmAgent(
         # model=,
-        model = ollama_model3,
+        model = GEMINI_MODEL2,
+        name="open_study_builder_agent",
+        instruction=(
+            "Help the user interact with the OpenStudyBuilder API via the available tools. First call the planner and the use the tools"
+        ),
+        tools=tools,
+    )
+    return osb_agent, osb_exit_stack
+
+open_study_builder_agent, osb_exit_stack = asyncio.run(create_open_study_builder_agent())
+
+async def create_study_builder_planner_agent():
+    """Fetches MCP tools and returns an LlmAgent for OpenStudyBuilder API."""
+    server_params = StdioServerParameters(
+        command="uv",
+        args=["run" ,"./main.py"],
+    )
+    tools, osb_exit_stack = await MCPToolset.from_server(connection_params=server_params)
+    osb_agent = LlmAgent(
+        # model=,
+        model = GEMINI_MODEL2,
         name="open_study_builder_agent",
         instruction=(
             "Help the user interact with the OpenStudyBuilder API via the available tools. First call the planner and the use the tools"
@@ -81,7 +96,7 @@ root_instruction = (
 
 root_agent = Agent(
     name="root_agent",
-    model=ollama_model3,
+    model=GEMINI_MODEL2,
     instruction=root_instruction,
     description="Coordinator agent for OpenStudyBuilder agent and google search agent.",
     tools=[],

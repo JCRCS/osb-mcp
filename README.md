@@ -1,5 +1,16 @@
 # OSB-MCP (Open Study Builder - Model Context Protocol)
 
+
+## 🔐 Environment Setup
+
+1. Copy `.env.example` to `.env`.
+2. Fill in your API keys and configuration values.
+3. Ensure that `.env` is not committed to version control.
+
+```bash
+cp .env.example .env
+```
+
 ## Overview
 
 OSB-MCP is a multi-agent system that automates the StudyBuilder creation process using Google ADK (Agent Development Kit) agents. The system consists of multiple specialized agents working together to search for information and create StudyBuilder objects in a specified order.
