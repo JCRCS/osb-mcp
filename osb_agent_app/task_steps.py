@@ -31,6 +31,39 @@ def preview_epoch(context: dict) -> dict:
     epochs = [{"epoch_id": "E1"}]
     return {"epochs": epochs}
 
+def create_visit(context: dict) -> dict:
+    study = context.get("study", {})
+    epochs = [{"epoch_id": "E1"}]
+    return {"epochs": epochs}
+def preview_visit(context: dict) -> dict:
+    study = context.get("study", {})
+    epochs = [{"epoch_id": "E1"}]
+    return {"epochs": epochs}
+def get_study_visits(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+def get_study_epoch(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+def fetch_visit_control_terminology(context: dict) -> dict:
+    return {"visit_control_terms": ["Run-In", "Washout"]}
+def fetch_time_point_reference_control_terminology(context: dict) -> dict:
+    return {"visit_control_terms": ["Run-In", "Washout"]}
+def create_activity_schedule(context: dict) -> dict:
+    study = context.get("study", {})
+    schedule = [{"schedule_id": "E1"}]
+    return {"schedule": schedule}
+def get_activity_schedule(context: dict) -> dict:
+    study = context.get("study", {})
+    schedule = [{"schedule_id": "E1"}]
+    return {"schedule": schedule}
+def create_design_cell(context: dict) -> dict:
+    study = context.get("study", {})
+    design_cell = [{"design_cell_id": "E1"}]
+    return {"design_cell": design_cell}
+
 # def create_branch_arms(context: dict) -> dict:
 #     arms = context.get("arms", [])
 #     branch_arms = [{"branch_arm_id": f"B_{a['arm_id']}"} for a in arms]

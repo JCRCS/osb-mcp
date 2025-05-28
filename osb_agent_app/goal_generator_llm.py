@@ -14,18 +14,26 @@ AVAILABLE_TASKS = [
     {"name": "create_study_arm", "description": "Perform the task of creating 1 'create_study_arm'."},
     {"name": "create_epoch", "description": "Perform the task of creating 1 'create_epoch'."},
     {"name": "preview_epoch", "description": "fills the needed data to perform the creation of the epoch Perform the task preview 1 'preview_epoch'."},
-    # {"name": "create_branch_arm", "description": "Perform the task of creating 1 'create_branch_arm'."},
     {"name": "create_element", "description": "Perform the task of creating 1 'create_element'."},
     {"name": "fetch_arm_control_terminology", "description": "Perform the task 'fetch_arm_control_terminology'."},
     {"name": "fetch_epoch_control_terminology", "description": "Perform the task 'fetch_epoch_control_terminology'."},
-    # {"name": "fetch_branch_arm_control_terminology", "description": "Perform the task 'fetch_branch_arm_control_terminology'."},
     {"name": "fetch_element_control_terminology", "description": "Perform the task 'fetch_element_control_terminology'."},
     {"name": "fetch_activity_type_terminology", "description": "Retrieves control terminology for activity type."},
-    {"name": "fetch_activity_group_control_terminology", "description": "Retrieves control terminology for activity groups."},
-    {"name": "fetch_activity_sub_group_control_terminology", "description": "Retrieves control terminology for actviity sub groups."},
     {"name": "fetch_soa_group_control_terminology", "description": "Retrieves control terminology for activity schedule of activities groups."},
     {"name": "create_study_activity", "description": "Defines study activities."},
     {"name": "get_study_activity", "description": "get study activities to check uniqueness."},
+
+    {"name": "create_activity_schedule", "description": "Defines create visit activity schedule"},
+    {"name": "get_activity_schedule", "description": "gets visit activity schedule"},
+    {"name": "create_design_cell", "description": "Defines create design cell"},
+
+    {"name": "create_visit", "description": "Perform the task of creating 1 'create_visit'."},
+    {"name": "preview_visit", "description": "fills the needed data to perform the creation of the visit Perform the task preview 1 'preview_visit'."},
+    {"name": "fetch_time_point_reference_control_terminology", "description": "Perform the task 'fetch_time_point_reference_control_terminology'."},
+    {"name": "fetch_visit_control_terminology", "description": "Perform the task 'fetch_visit_control_terminology'."},
+    {"name": "get_study_visits", "description": "get study visits to check uniqueness in timeline."},
+    {"name": "get_activity_schedule", "description": "get study visits activity schedules to check uniqueness in timeline."},
+    {"name": "get_study_epochs", "description": "get study epochs to check uniqueness."},
 ]
 
 

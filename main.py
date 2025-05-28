@@ -136,6 +136,285 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
     return resp.json()
 
 
+# @mcp.tool(description="""
+#         Retrieve a list of visits contact modes from the Open Study Builder (OSB) API.
+#         In order that the other agent can unerstand you, return a tuple with:
+#         - term_uid and sponsor_preferred_name
+#           """)
+# def fetch_visit_contact_mode_terminology() -> dict:
+#     """
+#     Fetches all  visit contact modes from the Open Study Builder.
+
+#     Returns:
+#     - dict: A dictionary containing all  visits contact modes metadata.
+
+#     In order that the other agent can unerstand you, return a tuple with:
+#     - term_uid and sponsor_preferred_name
+#     """
+#     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Visit+Contact+Mode")
+#     time.sleep(1)
+#     return resp.json()
+
+
+
+# @mcp.tool(description="""
+#         Retrieve a list of visits repeating frequency types from the Open Study Builder (OSB) API.     
+#         In order that the other agent can unerstand you, return a tuple with:
+#         - term_uid and sponsor_preferred_name
+#           """)
+# def fetch_visit_repeating_frequency_type_terminology() -> dict:
+#     """
+#     Fetches all  visit repeating frequency types from the Open Study Builder.
+
+#     Returns:
+#     - dict: A dictionary containing all  visits repeating frequency types metadata.
+
+#     In order that the other agent can unerstand you, return a tuple with:
+#     - term_uid and sponsor_preferred_name
+#     """
+#     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Repeating+Visit+Frequency")
+#     time.sleep(1)
+#     return resp.json()
+
+
+
+
+# @mcp.tool(description="""
+#           Retrieve a list of visit's phase/epoch allocation from the Open Study Builder (OSB) API.
+#           In order that the other agent can understand you, return a tuple with:
+#             - term_uid and sponsor_preferred_name
+#           """)
+# def fetch_visit_epoch_allocation_type_terminology() -> dict:
+#     """
+#     Fetches all  visit phase/epoch allocation types from the Open Study Builder.
+
+#     Returns:
+#     - dict: A dictionary containing all phase/epoch allocation frequency types metadata.
+
+#     In order that the other agent can unerstand you, return a tuple with:
+#     - term_uid and sponsor_preferred_name
+#     """
+#     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Allocation")
+#     time.sleep(1)
+#     return resp.json()
+
+
+@mcp.tool(description="""Retrieve a list of study epochs from the Open Study Builder (OSB) API. 
+          get epoch as epoch uid and the epoch_name to so it can be used on preview_visit""")
+def get_study_epochs(
+        study_uid:str,
+) -> dict:
+    """
+    Fetches all studies from the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all studies metadata.
+    """
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs?page_size=0")
+    time.sleep(1)
+    return resp.json()
+
+
+@mcp.tool(description="""Retrieve a list of study visit from the Open Study Builder (OSB) API. 
+          get the visit name, the visit time value, the visit type unit and the epoch uid to check uniqueness on the timeline to assign the time value on preview_visit""")
+def get_study_visits(
+        study_uid:str,
+) -> dict:
+    """
+    Fetches all studies from the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all studies metadata.
+    """
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits?page_size=50&sort_by=%7B%22order%22:false%7D")
+    time.sleep(1)
+    return resp.json()
+
+@mcp.tool(description="""
+        Retrieve a list of types of visits from the Open Study Builder (OSB) API.
+        In order that the other agent can understand you, return a tuple with:
+        - term_uid and sponsor_preferred_name
+          """)
+def fetch_visit_type_control_terminology() -> dict:
+    """
+    Fetches all types of visits from the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all visit types metadata.
+
+    In order that the other agent can unerstand you, return a tuple with:
+    - term_uid and sponsor_preferred_name
+    """
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms/names?page_size=0&codelist_name=VisitType")
+    time.sleep(1)
+    return resp.json()
+
+
+
+@mcp.tool(description="""
+        Retrieve a list of time point reference types from the Open Study Builder (OSB) API.
+        In order that the other agent can understand you, return a tuple with:
+            - term_uid and sponsor_preferred_name
+        """)
+def fetch_time_point_reference_control_terminology() -> dict:
+    """
+    Fetches all time point reference types of the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all time point reference types metadata.
+
+    In order that the other agent can understand you, return a tuple with:
+    - term_uid and sponsor_preferred_name
+    """
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Time+Point+Reference")
+    time.sleep(1)
+    return resp.json()
+
+@mcp.tool(description="""
+          Preview a study visit in the Open Study Builder (OSB) so it will generate the needed fields to create an visit. 
+          Be sure that first fetch_visit_type_control_terminology to get the visit type """)
+def preview_visit(
+        study_uid:str,
+        is_global_anchor_visit:str,
+        # visit_class:str,
+        # show_visit:str,
+        # min_visit_window_value:str,
+        # max_visit_window_value:str,
+        # visit_subclass:str,
+        # visit_window_unit_uid:str,
+        study_epoch_uid:str,
+        # epoch_allocation_uid:str,
+        time_value:str,
+        time_reference_uid:str,
+        visit_type_uid:str,
+        # visit_contact_mode_uid:str,
+        # time_unit_uid:str,
+) -> dict:
+    """
+    Preview a new study visit inside the Open Study Builder.
+
+    Parameters:
+    - study_uid: study where it's the visit that the user wants to create
+    - study_data (dict): The study visit to be created. Must follow the Open Study Builder schema.
+    * {
+        "is_global_anchor_visit":false,
+        "visit_class":"SINGLE_VISIT",
+        "show_visit":true,
+        "min_visit_window_value":0,
+        "max_visit_window_value":0,
+        "visit_subclass":"SINGLE_VISIT",
+        "visit_window_unit_uid":"UnitDefinition_000365",
+        "study_epoch_uid":"StudyEpoch_000039",
+        "epoch_allocation_uid":"CTTerm_000192",
+        "time_value":0,
+        "time_reference_uid":"CTTerm_000119",
+        "visit_type_uid":"CTTerm_000190",
+        "visit_contact_mode_uid":"CTTerm_000079",
+        "time_unit_uid":"UnitDefinition_000365"
+    }
+
+    Returns:
+    - dict: Information about the newly created study visit or any error.
+    """
+    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits/preview",json={
+        "is_global_anchor_visit":is_global_anchor_visit,
+        "visit_class":"SINGLE_VISIT",
+        "show_visit":True,
+        "min_visit_window_value":0,
+        "max_visit_window_value":0,
+        "visit_subclass":"SINGLE_VISIT",
+        "visit_window_unit_uid":"UnitDefinition_000365",
+        "study_epoch_uid":study_epoch_uid,
+        "epoch_allocation_uid":"CTTerm_000192",
+        "time_value":time_value,
+        "time_reference_uid":time_reference_uid,
+        "visit_type_uid":visit_type_uid,
+        "visit_contact_mode_uid":"CTTerm_000079",
+        "time_unit_uid":"UnitDefinition_000365",
+    })
+    time.sleep(1)
+    return resp.json()
+
+
+@mcp.tool(description="""
+          Create a new study visit in the Open Study Builder (OSB). 
+          Be sure that first get the preview_visit to get all the properties. If the preview doesn't succeed retry the preview to get the parameters. 
+          """)
+def create_visit(
+        study_uid,
+        is_global_anchor_visit,
+        visit_class,
+        show_visit,
+        min_visit_window_value,
+        max_visit_window_value,
+        visit_subclass,
+        visit_window_unit_uid,
+        study_epoch_uid,
+        epoch_allocation_uid,
+        time_value,
+        time_reference_uid,
+        visit_type_uid,
+        visit_contact_mode_uid,
+        is_soa_milestone,
+        study_day_label,
+        study_week_label,
+        description,
+        time_unit_uid,
+    ) -> dict:
+    """
+    Creates a new study visit inside the Open Study Builder.
+
+    Parameters:
+    - study_uid: study where it's the visit that the user wants to create
+    - study_data (dict): The study visit to be created. Must follow the Open Study Builder schema.
+    * {
+        "is_global_anchor_visit":true,
+        "visit_class":"SINGLE_VISIT",
+        "show_visit":true,
+        "min_visit_window_value":0,
+        "max_visit_window_value":0,
+        "visit_subclass":"SINGLE_VISIT",
+        "visit_window_unit_uid":"UnitDefinition_000365",
+        "study_epoch_uid":"StudyEpoch_000039",
+        "epoch_allocation_uid":"CTTerm_000192",
+        "time_value":0,
+        "time_reference_uid":"CTTerm_000119",
+        "visit_type_uid":"CTTerm_000190",
+        "visit_contact_mode_uid":"CTTerm_000079",
+        "is_soa_milestone":true,
+        "study_day_label":"Day 1",
+        "study_week_label":"Week 1",
+        "description":"test",
+        "time_unit_uid":"UnitDefinition_000365"
+    }
+
+    Returns:
+    - dict: Information about the newly created study visit or any error.
+    """
+    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits",json={
+            "is_global_anchor_visit":is_global_anchor_visit,
+            "visit_class":visit_class,
+            "show_visit":show_visit,
+            "min_visit_window_value":min_visit_window_value,
+            "max_visit_window_value":max_visit_window_value,
+            "visit_subclass":visit_subclass,
+            "visit_window_unit_uid":visit_window_unit_uid,
+            "study_epoch_uid":study_epoch_uid,
+            "epoch_allocation_uid":epoch_allocation_uid,
+            "time_value":time_value,
+            "time_reference_uid":time_reference_uid,
+            "visit_type_uid":visit_type_uid,
+            "visit_contact_mode_uid":visit_contact_mode_uid,
+            "is_soa_milestone":is_soa_milestone,
+            "study_day_label":study_day_label,
+            "study_week_label":study_week_label,
+            "description":description,
+            "time_unit_uid":time_unit_uid,
+    })
+    time.sleep(1)
+    return resp.json()
+
+
 @mcp.tool(description="Retrieve a list of epochs from the Open Study Builder (OSB) API.")
 def fetch_epoch_control_terminology() -> dict:
     """
@@ -306,18 +585,6 @@ def fetch_activity_type_terminology() -> dict:
     time.sleep(1)
     return resp.json()
 
-@mcp.tool(description="Retrieve a list of possible activity sub groups from the Open Study Builder (OSB) API.")
-def fetch_activity_sub_group_control_terminology() -> dict:
-    """
-    Fetches all types of activities sub groups from the Open Study Builder.
-
-    Returns:
-    - dict: A dictionary containing all activity sub group metadata.
-    """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/concepts/activities/activity-sub-groups?ppage_size=0&filters=%7B%22status%22:%7B%22v%22:[%22Final%22],%22op%22:%22co%22%7D%7D&sort_by=%7B%22name%22:true%7D")
-    time.sleep(1)
-    return resp.json()
-
 
 @mcp.tool(description="Retrieve a list of types of soa group terms from the Open Study Builder (OSB) API.")
 def fetch_soa_group_control_terminology() -> dict:
@@ -328,18 +595,6 @@ def fetch_soa_group_control_terminology() -> dict:
     - dict: A dictionary containing all activity types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Flowchart+Group")
-    time.sleep(1)
-    return resp.json()
-
-@mcp.tool(description="""Retrieve a list of possible activity groups from the Open Study Builder (OSB) API.""")
-def fetch_activity_group_control_terminology() -> dict:
-    """
-    Fetches all types of activities groups from the Open Study Builder.
-
-    Returns:
-    - dict: A dictionary containing all activity group metadata.
-    """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/concepts/activities/activity-groups?ppage_size=0&filters=%7B%22status%22:%7B%22v%22:[%22Final%22],%22op%22:%22co%22%7D%7D&sort_by=%7B%22name%22:true%7D")
     time.sleep(1)
     return resp.json()
 
@@ -494,7 +749,50 @@ def create_element(study_uid,
     return resp.json()
 
 
+@mcp.tool(description="""get study visit activity schedule in the Open Study Builder (OSB). 
+          Get study visit activity schedule to check uniqueness 
+          return the study_activity_uid and the study_visit_uid match its names on the get_study_activity and get_study_visits
+          """)
+def get_activity_schedule(study_uid, 
+    ) -> dict:
+    """
+    get study visit activity schedules inside the Open Study Builder.
 
+    Returns:
+    - dict: Information about the newly get  study visit activity schedule or any error.
+
+    
+    """
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules?operational=false")
+    time.sleep(1)
+    return resp.json()
+
+@mcp.tool(description="First get_activity_schedule inorder to create. Create a new study visit activity schedule in the Open Study Builder (OSB). Make sure that first you have the study visit activity, study visit ")
+def create_activity_schedule(study_uid, 
+        study_activity_uid,
+        study_visit_uid,
+    ) -> dict:
+    """
+    Creates a new study visit activity schedule inside the Open Study Builder.
+
+    Parameters:
+    - study_uid: study where it's the study visit activity schedule  that the user wants to create
+    - study_data (dict): The study visit activity schedule to be created. Must follow the Open Study Builder schema.
+    * {
+        "study_activity_uid":"StudyActivity_000028",
+        "study_visit_uid":"StudyVisit_000039"
+    }
+
+
+    Returns:
+    - dict: Information about the newly created study visit activity schedule or any error.
+    """
+    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules",json={        
+        "study_activity_uid":study_activity_uid,
+        "study_visit_uid":study_visit_uid
+    })
+    time.sleep(1)
+    return resp.json()
 
 
 @mcp.tool(description="Create a new study Design Cell in the Open Study Builder (OSB). Make sure that first you have the Study_arm_uid, study_element_uid, study_epoch_uid")

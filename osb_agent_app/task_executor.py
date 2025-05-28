@@ -8,16 +8,24 @@ from .task_steps import (
     create_study_arm,
     preview_epoch,
     create_epoch,
-    # create_branch_arms,
     create_element,
     fetch_arm_control_terminology,
     fetch_epoch_control_terminology,
-    # fetch_branch_arm_control_terminology,
-    fetch_element_control_terminology,fetch_activity_type_terminology,fetch_activity_group_control_terminology,
-    fetch_activity_sub_group_control_terminology,
+    fetch_element_control_terminology,
+    fetch_activity_type_terminology,
+    create_visit,
+    preview_visit,
+    fetch_time_point_reference_control_terminology,
+    fetch_visit_control_terminology,
+    get_study_visits,
+    get_study_epoch,
     fetch_soa_group_control_terminology,
     fetch_study_activity,
     create_study_activity,
+    create_activity_schedule,
+    get_activity_schedule,
+    create_design_cell
+
 
 )
 
@@ -30,20 +38,25 @@ class TaskExecutor:
         self.steps = {
             "create_study": create_study,
             "create_study_arm": create_study_arm,
+            "create_visit":create_visit,
+            "preview_visit":preview_visit,
+            "fetch_time_point_reference_control_terminology":fetch_time_point_reference_control_terminology,
+            "fetch_visit_control_terminology":fetch_visit_control_terminology,
+            "get_study_visits":get_study_visits,
+            "get_study_epoch":get_study_epoch,
             "preview_epoch": preview_epoch,
             "create_epoch": create_epoch,
             "create_study_activity": create_study_activity,
             "fetch_study_activity": fetch_study_activity,
-            # "create_branch_arms": create_branch_arms,
             "create_element": create_element,
             "fetch_arm_control_terminology": fetch_arm_control_terminology,
             "fetch_epoch_control_terminology": fetch_epoch_control_terminology,
             "fetch_activity_type_terminology": fetch_activity_type_terminology,
-            "fetch_activity_group_control_terminology": fetch_activity_group_control_terminology,
-            "fetch_activity_sub_group_control_terminology": fetch_activity_sub_group_control_terminology,
             "fetch_soa_group_control_terminology": fetch_soa_group_control_terminology,
-            # "fetch_branch_arm_control_terminology": fetch_branch_arm_control_terminology,
             "fetch_element_control_terminology": fetch_element_control_terminology,
+            "create_design_cell":create_design_cell,
+            "create_activity_schedule":create_activity_schedule,
+            "get_activity_schedule":get_activity_schedule,
         }
 
     def execute(self, tasks: list[str]) -> list[dict]:
