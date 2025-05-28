@@ -16,10 +16,53 @@ def create_epoch(context: dict) -> dict:
     epochs = [{"epoch_id": "E1"}]
     return {"epochs": epochs}
 
+def create_study_activity(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+
+def fetch_study_activity(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+
 def preview_epoch(context: dict) -> dict:
     study = context.get("study", {})
     epochs = [{"epoch_id": "E1"}]
     return {"epochs": epochs}
+
+def create_visit(context: dict) -> dict:
+    study = context.get("study", {})
+    epochs = [{"epoch_id": "E1"}]
+    return {"epochs": epochs}
+def preview_visit(context: dict) -> dict:
+    study = context.get("study", {})
+    epochs = [{"epoch_id": "E1"}]
+    return {"epochs": epochs}
+def get_study_visits(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+def get_study_epoch(context: dict) -> dict:
+    study = context.get("study", {})
+    activities = [{"activity_id": "E1"}]
+    return {"activity": activities}
+def fetch_visit_control_terminology(context: dict) -> dict:
+    return {"visit_control_terms": ["Run-In", "Washout"]}
+def fetch_time_point_reference_control_terminology(context: dict) -> dict:
+    return {"visit_control_terms": ["Run-In", "Washout"]}
+def create_activity_schedule(context: dict) -> dict:
+    study = context.get("study", {})
+    schedule = [{"schedule_id": "E1"}]
+    return {"schedule": schedule}
+def get_activity_schedule(context: dict) -> dict:
+    study = context.get("study", {})
+    schedule = [{"schedule_id": "E1"}]
+    return {"schedule": schedule}
+def create_design_cell(context: dict) -> dict:
+    study = context.get("study", {})
+    design_cell = [{"design_cell_id": "E1"}]
+    return {"design_cell": design_cell}
 
 # def create_branch_arms(context: dict) -> dict:
 #     arms = context.get("arms", [])
@@ -43,3 +86,19 @@ def fetch_epoch_control_terminology(context: dict) -> dict:
 
 def fetch_element_control_terminology(context: dict) -> dict:
     return {"element_control_terms": ["Lab", "Visit"]}
+
+
+def fetch_activity_type_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}
+
+
+def fetch_activity_group_control_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}
+
+
+def fetch_activity_sub_group_control_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}
+
+
+def fetch_soa_group_control_terminology(context: dict) -> dict:
+    return {"epoch_control_terms": ["Run-In", "Washout"]}

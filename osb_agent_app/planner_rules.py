@@ -10,13 +10,26 @@ PLANNER_RULES = {
     "create_study": ["create_study"],
     "create_study_arm": ["create_study_arm"],
     "create_epoch": ["create_epoch"],
+    "create_study_activity": ["create_study_activity"],
+    "get_study_activity": ["get_study_activity"],
     "preview_epoch": ["preview_epoch"],
-    # "create_branch_arm": ["create_branch_arm"],
     "create_element": ["create_element"],
     "create_design_cell": ["create_design_cell"],
 
+    "create_activity_schedule": ["create_activity_schedule"],
+    "get_activity_schedule": ["get_activity_schedule"],
+    "create_visit": ["create_visit"],
+    "preview_visit": ["preview_visit"],
+    "fetch_visit_control_terminology": ["fetch_visit_control_terminology"],
+    "fetch_time_point_reference_control_terminology": ["fetch_time_point_reference_control_terminology"],
+    "get_activity_schedule": ["get_activity_schedule"],
+    "get_study_visits": ["get_study_visits"],
+    "get_study_epoch": ["get_study_epoch"],
+
     "fetch_arm_control_terminology": ["fetch_arm_control_terminology"],
     "fetch_epoch_control_terminology": ["fetch_epoch_control_terminology"],
+    "fetch_activity_type_terminology": ["fetch_activity_type_terminology"],
+    "fetch_soa_group_control_terminology": ["fetch_soa_group_control_terminology"],
     "fetch_element_control_terminology": ["fetch_element_control_terminology"],
 }
 
@@ -26,12 +39,37 @@ TASK_DEPENDENCIES = {
     "create_study_arm": ["create_study","fetch_arm_control_terminology"],
     "preview_epoch": ["create_study", "fetch_epoch_control_terminology"],
     "create_epoch": ["create_study", "fetch_epoch_control_terminology","preview_epoch"],
+    "create_design_cell": [
+        "create_study",
+        "create_study_arm",
+        "create_epoch",
+        "create_element",
+    ],
+    "create_activity_schedule": [
+        "get_activity_schedule",
+        "get_study_activity",
+        "get_study_visits",
+    ],
+    #  "get_activity_schedule": [
+    #     "get_study_activity",
+    #     "get_study_visits",
+    # ],
+    "create_study_activity": [
+        "create_study",
+        "fetch_activity_type_terminology",
+        "fetch_soa_group_control_terminology",
+        "get_study_activity",
+    ],
+    "create_visit": [
+        "create_study",
+        "fetch_time_point_reference_control_terminology",
+        "fetch_visit_control_terminology",
+        "get_study_epoch",
+        "get_study_visits",
+        "preview_visit",
+    ],
     "create_element": ["create_study", "fetch_element_control_terminology"],
 
-    # Each fetch must wait for its corresponding create
-    # "fetch_arm_control_terminology": [],
-    # "fetch_epoch_control_terminology": [],
-    # "fetch_element_control_terminology": [],
 }
 
 def requires_create_study(context):
