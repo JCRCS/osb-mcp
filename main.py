@@ -1,49 +1,46 @@
-import asyncio
 import logging
-from fastapi.responses import StreamingResponse
-from fastapi import Request
-import httpx
-from osb_agent_app.agent import run_llm_driven_workflow
 from mcp.server.fastmcp import FastMCP
 import time
 from config import OPEN_STUDY_BUILDER_URL
+import helper as hp
 
 # Setup basic logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 from pydantic import BaseModel, RootModel
 from typing import List
 
-class Content(BaseModel):
-    soa_group_term_uid: str
-    activity_uid: str
-    order: str
-    activity_group_uid: str
-    activity_subgroup_uid: str
 
-class RequestItem(BaseModel):
-    method: str
-    content: Content
-
-class RequestList(RootModel[List[RequestItem]]):
-    pass
 
 # Initialize MCP server
-mcp = FastMCP("OSB-MCP-Server", description="MCP Server providing access to Open Study Builder studies and general API utilities.")
+mcp = FastMCP(
+    "OSB-MCP-Server",
+    description="MCP Server providing access to Open Study Builder studies and general API utilities.",
+)
 
-@mcp.tool(description="Retrieve a list of studies from the Open Study Builder (OSB) API.")
-def get_studies() -> dict:
+
+@mcp.tool(
+    description="""Retrieve a list of studies from the Open Study Builder (OSB) API.
+          the list should retrieve uid, acronym and study number 
+          """
+)
+async def get_studies() -> dict:
     """
     Fetches all studies from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all studies metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies?page_number=1&page_size=0")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies"
+    params = {"page_size": 0, "page_number": 1, "include_sections": "study_description"}
+    # time.sleep(2)
+    return await hp.fetch_json(url, json_data=params)
 
-@mcp.tool(description="""BEFORE creating a study execute GET studies to generate unique properties. Create a new study in the Open Study Builder (OSB). BEFORE GET studies to generate unique properties
+
+@mcp.tool(
+    description="""BEFORE creating a study execute GET studies to generate unique properties. Create a new study in the Open Study Builder (OSB). BEFORE GET studies to generate unique properties
           Parameters:
         -   {"project_number": CDISC DEV, 
             "study_acronym": ["string", "Acronym of the study should be unique across studies"]
@@ -51,51 +48,69 @@ def get_studies() -> dict:
             }
 
           
-          """)
-async def create_study( study_acronym:str, study_number: str) -> dict:
+          """
+)
+async def create_study(study_acronym: str, study_number: str) -> dict:
     """
     Before using create_study, get studies to check uniqueness. Creates a new study inside the Open Study Builder.
 
+    Create a study with study_number 4 number digits randomly
     Parameters:
-    -   {"project_number": CDISC DEV, 
+    -   {"project_number": CDISC DEV,
         "study_acronym": ["string", "Acronym of the study should be unique across studies"]
         "study_number": ["string","Number of the study should be a 4 digit number.", "It's unique, check into the existent studies"]
         }
 
     a good example is
         {
-        "study_acronym": "study_acronym", 
+        "study_acronym": "study_acronym",
         "study_number": "1117"
         }
 
     Returns:
     - dict: Information about the newly created study or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies", json={
-        "project_number": "CDISC DEV", 
-        "study_acronym": study_acronym, 
-        "study_number": study_number
-    })
-    # await asyncio.sleep(1000)
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies"
+    payload = {
+        "project_number": "CDISC DEV",
+        "study_acronym": study_acronym,
+        "study_number": study_number,
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="Retrieve a list of types of arms from the Open Study Builder (OSB) API.")
-def fetch_arm_control_terminology() -> dict:
+@mcp.tool(
+    description="Retrieve a list of types of arms from the Open Study Builder (OSB) API."
+)
+async def fetch_arm_control_terminology() -> dict:
     """
     Fetches all types of arms from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all arm types metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Arm+Type")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Arm+Type"
+    params = {}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-@mcp.tool(description="Create a new study Arm in the Open Study Builder (OSB). Be sure that first get the fetch_arm_control_terminology to get the arm types")
-def create_arm(study_uid, name, short_name, code, description, color, randomization_group, number_of_subjects, arm_type_uid, study_arm_data: dict) -> dict:
+@mcp.tool(
+    description="Create a new study Arm in the Open Study Builder (OSB). Be sure that first get the fetch_arm_control_terminology to get the arm types"
+)
+async def create_study_arm(
+    study_uid,
+    name,
+    short_name,
+    code,
+    description,
+    color,
+    randomization_group,
+    number_of_subjects,
+    arm_type_uid,
+    study_arm_data: dict,
+) -> dict:
     """
     Creates a new study Arm inside the Open Study Builder.
 
@@ -116,7 +131,8 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
     Returns:
     - dict: Information about the newly created study arm or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-arms",json={
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-arms"
+    payload = {
         "name": name,
         "short_name": short_name,
         "code": code,
@@ -124,79 +140,99 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
         "arm_colour": color,
         "randomization_group": randomization_group,
         "number_of_subjects": number_of_subjects,
-        "arm_type_uid": arm_type_uid
-    })
-    time.sleep(1)
-    return resp.json()
+        "arm_type_uid": arm_type_uid,
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
+
+
+# TODO!
+@mcp.tool(
+    description="""
+        Retrieve a list of visits contact modes from the Open Study Builder (OSB) API.
+        In order that the other agent can unerstand you, return a tuple with:
+        - fetch_visit_contact_mode_terminology, term_uid and sponsor_preferred_name
+        - DON'T USE TBD
+          """
+)
+async def fetch_visit_contact_mode_terminology() -> dict:
+    """
+    Fetches all  visit contact modes from the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all  visits contact modes metadata.
+
+    In order that the other agent can unerstand you, return a tuple with:
+    - fetch_visit_contact_mode_terminology, term_uid and sponsor_preferred_name
+    """
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms"
+    params = {
+        "page_size": 100,
+        "sort_by": '{"name.sponsor_preferred_name":true}',
+        "codelist_name": "Visit Contact Mode",
+        "compact_response": True,
+    }
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
 # @mcp.tool(description="""
-#         Retrieve a list of visits contact modes from the Open Study Builder (OSB) API.
+#         Retrieve a list of visits repeating frequency types from the Open Study Builder (OSB) API.
 #         In order that the other agent can unerstand you, return a tuple with:
 #         - term_uid and sponsor_preferred_name
 #           """)
-# def fetch_visit_contact_mode_terminology() -> dict:
-#     """
-#     Fetches all  visit contact modes from the Open Study Builder.
-
-#     Returns:
-#     - dict: A dictionary containing all  visits contact modes metadata.
-
-#     In order that the other agent can unerstand you, return a tuple with:
-#     - term_uid and sponsor_preferred_name
-#     """
-#     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Visit+Contact+Mode")
-#     time.sleep(1)
-#     return resp.json()
-
-
-
-# @mcp.tool(description="""
-#         Retrieve a list of visits repeating frequency types from the Open Study Builder (OSB) API.     
-#         In order that the other agent can unerstand you, return a tuple with:
-#         - term_uid and sponsor_preferred_name
-#           """)
-# def fetch_visit_repeating_frequency_type_terminology() -> dict:
+# async def fetch_visit_repeating_frequency_type_terminology() -> dict:
 #     """
 #     Fetches all  visit repeating frequency types from the Open Study Builder.
 
 #     Returns:
 #     - dict: A dictionary containing all  visits repeating frequency types metadata.
 
-#     In order that the other agent can unerstand you, return a tuple with:
-#     - term_uid and sponsor_preferred_name
-#     """
-#     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Repeating+Visit+Frequency")
-#     time.sleep(1)
-#     return resp.json()
-
-
-
-
-# @mcp.tool(description="""
-#           Retrieve a list of visit's phase/epoch allocation from the Open Study Builder (OSB) API.
-#           In order that the other agent can understand you, return a tuple with:
-#             - term_uid and sponsor_preferred_name
-#           """)
-# def fetch_visit_epoch_allocation_type_terminology() -> dict:
-#     """
-#     Fetches all  visit phase/epoch allocation types from the Open Study Builder.
-
-#     Returns:
-#     - dict: A dictionary containing all phase/epoch allocation frequency types metadata.
 
 #     In order that the other agent can unerstand you, return a tuple with:
 #     - term_uid and sponsor_preferred_name
 #     """
-#     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Allocation")
-#     time.sleep(1)
-#     return resp.json()
+#     url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms"
+#     params = {
+#         "page_size": 100,
+#         "sort_by": '{"name.sponsor_preferred_name":true}',
+#         "codelist_name": "Repeating Visit Frequency",
+# "compact_response":True
+#     }
+#     return await hp.fetch_json(url, method="GET", json_data=params)
+@mcp.tool(
+    description="""
+          Retrieve a list of visit's phase/epoch allocation from the Open Study Builder (OSB) API.
+          In order that the other agent can understand you, return a tuple with:
+            - fetch_visit_epoch_allocation_type_terminology, term_uid and sponsor_preferred_name
+            - DON'T USE TBD
+          """
+)
+async def fetch_visit_epoch_allocation_type_terminology() -> dict:
+    """
+    Fetches all  visit phase/epoch allocation types from the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all phase/epoch allocation frequency types metadata.
+
+    In order that the other agent can unerstand you, return a tuple with:
+    - fetch_visit_epoch_allocation_type_terminology, term_uid and sponsor_preferred_name
+    """
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms"
+    params = {
+        "page_size": 100,
+        "sort_by": '{"name.sponsor_preferred_name":true}',
+        "codelist_name": "Epoch Allocation",
+        "compact_response": True,
+    }
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-@mcp.tool(description="""Retrieve a list of study epochs from the Open Study Builder (OSB) API. 
-          get epoch as epoch uid and the epoch_name to so it can be used on preview_visit""")
-def get_study_epochs(
-        study_uid:str,
+@mcp.tool(
+    description="""Retrieve a list of study epochs from the Open Study Builder (OSB) API. 
+          get epoch as epoch uid and the epoch_name to so it can be used on preview_visit"""
+)
+async def get_study_epochs(
+    study_uid: str,
 ) -> dict:
     """
     Fetches all studies from the Open Study Builder.
@@ -204,15 +240,18 @@ def get_study_epochs(
     Returns:
     - dict: A dictionary containing all studies metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs?page_size=0")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs"
+    params = {"page_size": 0}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-@mcp.tool(description="""Retrieve a list of study visit from the Open Study Builder (OSB) API. 
-          get the visit name, the visit time value, the visit type unit and the epoch uid to check uniqueness on the timeline to assign the time value on preview_visit""")
-def get_study_visits(
-        study_uid:str,
+@mcp.tool(
+    description="""Retrieve a list of study visit from the Open Study Builder (OSB) API. 
+          get the visit name, the visit time value, the visit type unit and the epoch uid to check uniqueness on the timeline to assign the time value on preview_visit"""
+)
+async def get_study_visits(
+    study_uid: str,
 ) -> dict:
     """
     Fetches all studies from the Open Study Builder.
@@ -220,16 +259,21 @@ def get_study_visits(
     Returns:
     - dict: A dictionary containing all studies metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits?page_size=50&sort_by=%7B%22order%22:false%7D")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits"
+    params = {"page_size": 50, "sort_by": '{"order":false}'}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
-@mcp.tool(description="""
+
+@mcp.tool(
+    description="""
         Retrieve a list of types of visits from the Open Study Builder (OSB) API.
         In order that the other agent can understand you, return a tuple with:
-        - term_uid and sponsor_preferred_name
-          """)
-def fetch_visit_type_control_terminology() -> dict:
+        - 'fetch_visit_type_control_terminology', term_uid and sponsor_preferred_name
+
+          """
+)
+async def fetch_visit_type_control_terminology() -> dict:
     """
     Fetches all types of visits from the Open Study Builder.
 
@@ -237,20 +281,23 @@ def fetch_visit_type_control_terminology() -> dict:
     - dict: A dictionary containing all visit types metadata.
 
     In order that the other agent can unerstand you, return a tuple with:
-    - term_uid and sponsor_preferred_name
+    - fetch_visit_type_control_terminology, term_uid and sponsor_preferred_name
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms/names?page_size=0&codelist_name=VisitType")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms/names?page_size=0&compact_response=true&codelist_name=VisitType"
+    params = {}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-
-@mcp.tool(description="""
+@mcp.tool(
+    description="""
         Retrieve a list of time point reference types from the Open Study Builder (OSB) API.
         In order that the other agent can understand you, return a tuple with:
-            - term_uid and sponsor_preferred_name
-        """)
-def fetch_time_point_reference_control_terminology() -> dict:
+        - fetch_time_point_reference_control_terminology, term_uid and sponsor_preferred_name
+        - DON'T USE TBD
+        """
+)
+async def fetch_time_point_reference_control_terminology() -> dict:
     """
     Fetches all time point reference types of the Open Study Builder.
 
@@ -258,31 +305,49 @@ def fetch_time_point_reference_control_terminology() -> dict:
     - dict: A dictionary containing all time point reference types metadata.
 
     In order that the other agent can understand you, return a tuple with:
-    - term_uid and sponsor_preferred_name
+    - fetch_time_point_reference_control_terminology, term_uid and sponsor_preferred_name
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Time+Point+Reference")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Time+Point+Reference"
+    params = {}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
-@mcp.tool(description="""
-          Preview a study visit in the Open Study Builder (OSB) so it will generate the needed fields to create an visit. 
-          Be sure that first fetch_visit_type_control_terminology to get the visit type """)
-def preview_visit(
-        study_uid:str,
-        is_global_anchor_visit:str,
-        # visit_class:str,
-        # show_visit:str,
-        # min_visit_window_value:str,
-        # max_visit_window_value:str,
-        # visit_subclass:str,
-        # visit_window_unit_uid:str,
-        study_epoch_uid:str,
-        # epoch_allocation_uid:str,
-        time_value:str,
-        time_reference_uid:str,
-        visit_type_uid:str,
-        # visit_contact_mode_uid:str,
-        # time_unit_uid:str,
+
+@mcp.tool(
+    description="""
+    Prepares a study visit preview by generating computed values for validation and creation.
+    If it's the first Visit needs to be the anchor and scheduled on day 0
+
+    Args:
+    - study_uid (str): UID of the target study.
+    - study_epoch_uid (str): UID of the study epoch.
+    - epoch_allocation_uid (str): UID from fetch_visit_epoch_allocation_type_terminology.
+    - time_value (int): Time point value for the visit.
+    - time_reference_uid (str): UID from fetch_time_point_reference_control_terminology.
+    - visit_type_uid (str): UID from fetch_visit_type_control_terminology.
+    - visit_contact_mode_uid (str): UID from fetch_visit_contact_mode_terminology.
+    - is_global_anchor_visit (bool): true if it's the FIRST VISIT in study NEEDS TO BE TRUE the anchor
+
+    Returns:
+    - dict: Preview response containing computed visit data or error details.
+    """
+)
+async def preview_visit(
+    study_uid: str,
+    is_global_anchor_visit: str,
+    # visit_class:str, #TODO!
+    # show_visit:str, #TODO!
+    # min_visit_window_value:str, #TODO!
+    # max_visit_window_value:str, #TODO!
+    # visit_subclass:str, #TODO!
+    # visit_window_unit_uid:str, #TODO!
+    study_epoch_uid: str,
+    epoch_allocation_uid: str,  # TODO!
+    time_value: str,
+    time_reference_uid: str,
+    visit_type_uid: str,
+    visit_contact_mode_uid: str,  # TODO!
+    # time_unit_uid:str, #TODO!
 ) -> dict:
     """
     Preview a new study visit inside the Open Study Builder.
@@ -291,70 +356,76 @@ def preview_visit(
     - study_uid: study where it's the visit that the user wants to create
     - study_data (dict): The study visit to be created. Must follow the Open Study Builder schema.
     * {
-        "is_global_anchor_visit":false,
+        "is_global_anchor_visit":true,
         "visit_class":"SINGLE_VISIT",
         "show_visit":true,
         "min_visit_window_value":0,
         "max_visit_window_value":0,
         "visit_subclass":"SINGLE_VISIT",
-        "visit_window_unit_uid":"UnitDefinition_000365",
+        "visit_window_unit_uid":"UnitDefinition_000364",
         "study_epoch_uid":"StudyEpoch_000039",
-        "epoch_allocation_uid":"CTTerm_000192",
+        "epoch_allocation_uid":  uid from fetch_visit_epoch_allocation_type_terminology data  "CTTerm_000198",
         "time_value":0,
-        "time_reference_uid":"CTTerm_000119",
-        "visit_type_uid":"CTTerm_000190",
-        "visit_contact_mode_uid":"CTTerm_000079",
-        "time_unit_uid":"UnitDefinition_000365"
+        "time_reference_uid":  uid from fetch_time_point_reference_control_terminology data  "CTTerm_000119",
+        "visit_type_uid": uid from fetch_visit_type_control_terminology data  "CTTerm_000190",
+        "visit_contact_mode_uid":uid from fetch_visit_contact_mode_terminology data "CTTerm_000078",
+        "time_unit_uid":"UnitDefinition_000364"
     }
 
     Returns:
     - dict: Information about the newly created study visit or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits/preview",json={
-        "is_global_anchor_visit":is_global_anchor_visit,
-        "visit_class":"SINGLE_VISIT",
-        "show_visit":True,
-        "min_visit_window_value":0,
-        "max_visit_window_value":0,
-        "visit_subclass":"SINGLE_VISIT",
-        "visit_window_unit_uid":"UnitDefinition_000365",
-        "study_epoch_uid":study_epoch_uid,
-        "epoch_allocation_uid":"CTTerm_000192",
-        "time_value":time_value,
-        "time_reference_uid":time_reference_uid,
-        "visit_type_uid":visit_type_uid,
-        "visit_contact_mode_uid":"CTTerm_000079",
-        "time_unit_uid":"UnitDefinition_000365",
-    })
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits/preview"
+    payload = {
+        "is_global_anchor_visit": is_global_anchor_visit,
+        "visit_class": "SINGLE_VISIT",
+        "show_visit": True,
+        "min_visit_window_value": 0,
+        "max_visit_window_value": 0,
+        "visit_subclass": "SINGLE_VISIT",
+        "visit_window_unit_uid": "UnitDefinition_000364",
+        "study_epoch_uid": study_epoch_uid,
+        "epoch_allocation_uid": "CTTerm_000198",
+        "time_value": time_value,
+        "time_reference_uid": time_reference_uid,
+        "visit_type_uid": visit_type_uid,
+        "visit_contact_mode_uid": "CTTerm_000078",
+        "time_unit_uid": "UnitDefinition_000364",
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="""
-          Create a new study visit in the Open Study Builder (OSB). 
-          Be sure that first get the preview_visit to get all the properties. If the preview doesn't succeed retry the preview to get the parameters. 
-          """)
-def create_visit(
-        study_uid,
-        is_global_anchor_visit,
-        visit_class,
-        show_visit,
-        min_visit_window_value,
-        max_visit_window_value,
-        visit_subclass,
-        visit_window_unit_uid,
-        study_epoch_uid,
-        epoch_allocation_uid,
-        time_value,
-        time_reference_uid,
-        visit_type_uid,
-        visit_contact_mode_uid,
-        is_soa_milestone,
-        study_day_label,
-        study_week_label,
-        description,
-        time_unit_uid,
-    ) -> dict:
+@mcp.tool(
+    description="""
+            Create a study visit in Open Study Builder (OSB).
+            Depends on Epochs, it needs the epochs to exists, so if there are none epochs create one
+            Must call `preview_visit` first to retrieve all required parameters.
+            If preview fails, retry it before proceeding with creation.
+            If it's the first Visit in the study needs to be the anchor in is_global_anchor_visit and scheduled on day 0
+          """
+)
+async def create_visit(
+    study_uid,
+    is_global_anchor_visit,
+    visit_class,
+    show_visit,
+    min_visit_window_value,
+    max_visit_window_value,
+    visit_subclass,
+    visit_window_unit_uid,
+    study_epoch_uid,
+    epoch_allocation_uid,
+    time_value,
+    time_reference_uid,
+    visit_type_uid,
+    visit_contact_mode_uid,
+    is_soa_milestone,
+    study_day_label,
+    study_week_label,
+    description,
+    time_unit_uid,
+) -> dict:
     """
     Creates a new study visit inside the Open Study Builder.
 
@@ -385,59 +456,69 @@ def create_visit(
     Returns:
     - dict: Information about the newly created study visit or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits",json={
-            "is_global_anchor_visit":is_global_anchor_visit,
-            "visit_class":visit_class,
-            "show_visit":show_visit,
-            "min_visit_window_value":min_visit_window_value,
-            "max_visit_window_value":max_visit_window_value,
-            "visit_subclass":visit_subclass,
-            "visit_window_unit_uid":visit_window_unit_uid,
-            "study_epoch_uid":study_epoch_uid,
-            "epoch_allocation_uid":epoch_allocation_uid,
-            "time_value":time_value,
-            "time_reference_uid":time_reference_uid,
-            "visit_type_uid":visit_type_uid,
-            "visit_contact_mode_uid":visit_contact_mode_uid,
-            "is_soa_milestone":is_soa_milestone,
-            "study_day_label":study_day_label,
-            "study_week_label":study_week_label,
-            "description":description,
-            "time_unit_uid":time_unit_uid,
-    })
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits"
+    payload = {
+        "is_global_anchor_visit": is_global_anchor_visit,
+        "visit_class": visit_class,
+        "show_visit": show_visit,
+        "min_visit_window_value": min_visit_window_value,
+        "max_visit_window_value": max_visit_window_value,
+        "visit_subclass": visit_subclass,
+        "visit_window_unit_uid": visit_window_unit_uid,
+        "study_epoch_uid": study_epoch_uid,
+        "epoch_allocation_uid": epoch_allocation_uid,
+        "time_value": time_value,
+        "time_reference_uid": time_reference_uid,
+        "visit_type_uid": visit_type_uid,
+        "visit_contact_mode_uid": visit_contact_mode_uid,
+        "is_soa_milestone": is_soa_milestone,
+        "study_day_label": study_day_label,
+        "study_week_label": study_week_label,
+        "description": description,
+        "time_unit_uid": time_unit_uid,
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="Retrieve a list of epochs from the Open Study Builder (OSB) API.")
-def fetch_epoch_control_terminology() -> dict:
+@mcp.tool(
+    description="Retrieve a list of epochs from the Open Study Builder (OSB) API."
+)
+async def fetch_epoch_control_terminology() -> dict:
     """
     Fetches all epochs from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all epoch metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/epochs/allowed-configs")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/epochs/allowed-configs"
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET")
 
-@mcp.tool(description="Retrieve a list of sub types of epochs from the Open Study Builder (OSB) API.")
-def fetch_epoch_sub_type_control_terminology() -> dict:
+
+@mcp.tool(
+    description="Retrieve a list of sub types of epochs from the Open Study Builder (OSB) API."
+)
+async def fetch_epoch_sub_type_control_terminology() -> dict:
     """
     Fetches all types of epochs from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all epoch types metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Sub+Type")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Sub+Type"
+    params = {}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-@mcp.tool(description="Preview a study Epoch in the Open Study Builder (OSB) so it will generate the needed fields to create an epoch. Me sure that first get the fetch epoch control terminologies to get the subtype")
-def preview_epoch(
-        study_uid,
-        epoch_subtype,) -> dict:
+@mcp.tool(
+    description="Preview a study Epoch in the Open Study Builder (OSB) so it will generate the needed fields to create an epoch. Me sure that first get the fetch epoch control terminologies to get the subtype"
+)
+async def preview_epoch(
+    study_uid,
+    epoch_subtype,
+) -> dict:
     """
     Preview a new study Epoch inside the Open Study Builder.
 
@@ -452,26 +533,27 @@ def preview_epoch(
     Returns:
     - dict: Information about the newly created study epoch or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs/preview",json={
-            "study_uid":study_uid,
-            "epoch_subtype":epoch_subtype,
-    })
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs/preview"
+    payload = {"study_uid": study_uid, "epoch_subtype": epoch_subtype}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="Create a new study Epoch in the Open Study Builder (OSB). Be sure that first get the preview_epoch to get the epoch type, and epoch")
-def create_epoch(
-        study_uid,
-        start_rule,
-        end_rule,
-        epoch,
-        epoch_subtype,
-        duration_unit,
-        order,
-        description,
-        duration,
-        color_hash) -> dict:
+@mcp.tool(
+    description="Create a new study Epoch in the Open Study Builder (OSB). Be sure that first get the preview_epoch to get the epoch type, and epoch"
+)
+async def create_epoch(
+    study_uid,
+    start_rule,
+    end_rule,
+    epoch,
+    epoch_subtype,
+    duration_unit,
+    order,
+    description,
+    duration,
+    color_hash,
+) -> dict:
     """
     Creates a new study Epoch inside the Open Study Builder.
 
@@ -494,25 +576,25 @@ def create_epoch(
     Returns:
     - dict: Information about the newly created study epoch or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs",json={
-            "study_uid":study_uid,
-            "start_rule":start_rule,
-            "end_rule":end_rule,
-            "epoch":epoch,
-            "epoch_subtype":epoch_subtype,
-            "duration_unit":duration_unit,
-            "order":order,
-            "description":description,
-            "duration":duration,
-            "color_hash":color_hash,
-    })
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs"
+    payload = {
+        "study_uid": study_uid,
+        "start_rule": start_rule,
+        "end_rule": end_rule,
+        "epoch": epoch,
+        "epoch_subtype": epoch_subtype,
+        "duration_unit": duration_unit,
+        "order": order,
+        "description": description,
+        "duration": duration,
+        "color_hash": color_hash,
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-
-
-@mcp.tool(description="""
+@mcp.tool(
+    description="""
           Retrieve a list of possible activity types from the Open Study Builder (OSB) API.
 
           The response structure is:
@@ -567,34 +649,49 @@ def create_epoch(
                 }
           
           you need to generate an output of activity_group_uid, activity_group_name, activity_subgroup_uid, activity_subgroup_name and activity name in triples so the agent can detect which activity to select
-    """)
-def fetch_activity_type_terminology() -> dict:
+    """
+)
+async def fetch_activity_type_terminology() -> dict:
     """
     Fetches all types of activities types from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all activity type metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/concepts/activities/activities?library_name=Sponsor&page_number=1&page_size=10&filters=%7B%22%2A%22%3A%7B%20%22v%22%3A%20%5B%22%22%5D%2C%20%22op%22%3A%20%22co%22%7D%7D&operator=and&total_count=false")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/concepts/activities/activities"
+    params = {
+        "library_name": "Sponsor",
+        "page_number": 1,
+        "page_size": 10,
+        "filters": '{"*":{"v":[""],"op":"co"}}',
+        "operator": "and",
+        "total_count": "false",
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-@mcp.tool(description="Retrieve a list of types of soa group terms from the Open Study Builder (OSB) API.")
-def fetch_soa_group_control_terminology() -> dict:
+@mcp.tool(
+    description="Retrieve a list of types of soa group terms from the Open Study Builder (OSB) API."
+)
+async def fetch_soa_group_control_terminology() -> dict:
     """
     Fetches all types of activities from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all activity types metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Flowchart+Group")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Flowchart+Group"
+    params = {}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
-@mcp.tool(description="Retrieve a list of study activities from the Open Study Builder (OSB) API. get the activity name, the activity group uid and the activity sub group uid to check uniqueness")
-def get_study_activities(
-        study_uid:str,
+
+@mcp.tool(
+    description="Retrieve a list of study activities from the Open Study Builder (OSB) API. get the activity name, the activity group uid and the activity sub group uid to check uniqueness"
+)
+async def get_study_activities(
+    study_uid: str,
 ) -> dict:
     """
     Fetches all studies from the Open Study Builder.
@@ -602,11 +699,14 @@ def get_study_activities(
     Returns:
     - dict: A dictionary containing all studies metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activities?page_size=0")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activities"
+    params = {"page_size": 0}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
-@mcp.tool(description=""" 
+
+@mcp.tool(
+    description=""" 
         Before using create_study_activity, get get_study_activities to check uniqueness on                   
             - activity_subgroup_uid, 
             - activity_group_uid, 
@@ -622,25 +722,26 @@ def get_study_activities(
         The needed fetch_activity_sub_group_control_terminology and fetch_activity_group_control_terminology must match with the fetch_activity_type_terminology groupings 
           
         
-        """)
-def create_study_activity(
-        study_uid:str,
-        soa_group_term_uid:str,
-        activity_uid:str,
-        order:str,
-        activity_group_uid:str,
-        activity_subgroup_uid:str,
-        # method:str,
-        ) -> dict:
+        """
+)
+async def create_study_activity(
+    study_uid: str,
+    soa_group_term_uid: str,
+    activity_uid: str,
+    order: str,
+    activity_group_uid: str,
+    activity_subgroup_uid: str,
+    # method:str,
+) -> dict:
     """
-    Creates a new study activity inside the Study. Where the Study Activity is an instantiation of an Activity define in the library storage. 
+    Creates a new study activity inside the Study. Where the Study Activity is an instantiation of an Activity define in the library storage.
 
     In order to create the activity you need to know:
         - activity types
         - activity sub groups
         - activity groups
         - activity soa group types
-    
+
     the Study Activity have a unique triple of:
         - activity type names
         - activity sub groups
@@ -651,7 +752,7 @@ def create_study_activity(
     Parameters:
     - study_uid: study where it's the activity that the user wants to create
     - study_data (dict): The study activity to be created. Must follow the Open Study Builder schema.
-    * 
+    *
             [
             {
                 "method":"POST",
@@ -668,47 +769,53 @@ def create_study_activity(
     Returns:
     - dict: Information about the newly created study activity or any error.
     """
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activities/batch"
     payload = [
-    {
-        "method":"POST",
-        "content":{
-            "soa_group_term_uid":soa_group_term_uid,
-            "activity_uid":activity_uid,
-            "order":None,
-            "activity_group_uid":activity_group_uid,
-            "activity_subgroup_uid":activity_subgroup_uid,
+        {
+            "method": "POST",
+            "content": {
+                "soa_group_term_uid": soa_group_term_uid,
+                "activity_uid": activity_uid,
+                "order": None,
+                "activity_group_uid": activity_group_uid,
+                "activity_subgroup_uid": activity_subgroup_uid,
+            },
         }
-    }
     ]
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activities/batch",json=payload)
-    time.sleep(1)
-    return resp.json()
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="Retrieve a list of types of elements from the Open Study Builder (OSB) API.")
-def fetch_element_control_terminology() -> dict:
+@mcp.tool(
+    description="Retrieve a list of types of elements from the Open Study Builder (OSB) API."
+)
+async def fetch_element_control_terminology() -> dict:
     """
     Fetches all types of elements from the Open Study Builder.
 
     Returns:
     - dict: A dictionary containing all element types metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Element+Type")
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Element+Type"
+    params = {}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
 
 
-@mcp.tool(description="Create a new study Element in the Open Study Builder (OSB). Me sure that first get the fetch_element_control_terminology to get the element types")
-def create_element(study_uid, 
-                name,
-                short_name,
-                code,
-                description,
-                start_rule,
-                end_rule,
-                element_colour,
-                element_subtype_uid,
-    ) -> dict:
+@mcp.tool(
+    description="Create a new study Element in the Open Study Builder (OSB). Me sure that first get the fetch_element_control_terminology to get the element types"
+)
+async def create_element(
+    study_uid,
+    name,
+    short_name,
+    code,
+    description,
+    start_rule,
+    end_rule,
+    element_colour,
+    element_subtype_uid,
+) -> dict:
     """
     Creates a new study Element inside the Open Study Builder.
 
@@ -729,7 +836,8 @@ def create_element(study_uid,
     Returns:
     - dict: Information about the newly created study element or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-elements",json={        
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-elements"
+    payload = {
         "name": name,
         "short_name": short_name,
         "code": code,
@@ -738,34 +846,42 @@ def create_element(study_uid,
         "end_rule": end_rule,
         "element_colour": element_colour,
         "element_subtype_uid": element_subtype_uid,
-    })
-    time.sleep(1)
-    return resp.json()
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="""get study visit activity schedule in the Open Study Builder (OSB). 
+@mcp.tool(
+    description="""get study visit activity schedule in the Open Study Builder (OSB). 
           Get study visit activity schedule to check uniqueness 
           return the study_activity_uid and the study_visit_uid match its names on the get_study_activity and get_study_visits
-          """)
-def get_activity_schedule(study_uid, 
-    ) -> dict:
+          """
+)
+async def get_activity_schedule(
+    study_uid,
+) -> dict:
     """
     get study visit activity schedules inside the Open Study Builder.
 
     Returns:
     - dict: Information about the newly get  study visit activity schedule or any error.
 
-    
-    """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules?operational=false")
-    time.sleep(1)
-    return resp.json()
 
-@mcp.tool(description="First get_activity_schedule inorder to create. Create a new study visit activity schedule in the Open Study Builder (OSB). Make sure that first you have the study visit activity, study visit ")
-def create_activity_schedule(study_uid, 
-        study_activity_uid,
-        study_visit_uid,
-    ) -> dict:
+    """
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules"
+    params = {"operational": "false"}
+    time.sleep(2)
+    return await hp.fetch_json(url, method="GET", json_data=params)
+
+
+@mcp.tool(
+    description="First get_activity_schedule inorder to create. Create a new study visit activity schedule in the Open Study Builder (OSB). Make sure that first you have the study visit activity, study visit "
+)
+async def create_activity_schedule(
+    study_uid,
+    study_activity_uid,
+    study_visit_uid,
+) -> dict:
     """
     Creates a new study visit activity schedule inside the Open Study Builder.
 
@@ -781,22 +897,26 @@ def create_activity_schedule(study_uid,
     Returns:
     - dict: Information about the newly created study visit activity schedule or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules",json={        
-        "study_activity_uid":study_activity_uid,
-        "study_visit_uid":study_visit_uid
-    })
-    time.sleep(1)
-    return resp.json()
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules"
+    payload = {
+        "study_activity_uid": study_activity_uid,
+        "study_visit_uid": study_visit_uid,
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
 
-@mcp.tool(description="Create a new study Design Cell in the Open Study Builder (OSB). Make sure that first you have the Study_arm_uid, study_element_uid, study_epoch_uid")
-def create_design_cell(study_uid, 
-        study_arm_uid,
-        study_epoch_uid,
-        study_element_uid,
-        transition_rule,
-        order,
-    ) -> dict:
+@mcp.tool(
+    description="Create a new study Design Cell in the Open Study Builder (OSB). Make sure that first you have the Study_arm_uid, study_element_uid, study_epoch_uid"
+)
+async def create_design_cell(
+    study_uid,
+    study_arm_uid,
+    study_epoch_uid,
+    study_element_uid,
+    transition_rule,
+    order,
+) -> dict:
     """
     Creates a new study Design Cell inside the Open Study Builder.
 
@@ -815,33 +935,21 @@ def create_design_cell(study_uid,
     Returns:
     - dict: Information about the newly created study Design Cell or any error.
     """
-    resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-design-cells",json={        
-        "study_arm_uid":  study_arm_uid,
-        "study_epoch_uid":  study_epoch_uid,
-        "study_element_uid":  study_element_uid,
-        "transition_rule":  transition_rule,
+    url = f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-design-cells"
+    payload = {
+        "study_arm_uid": study_arm_uid,
+        "study_epoch_uid": study_epoch_uid,
+        "study_element_uid": study_element_uid,
+        "transition_rule": transition_rule,
         "order": order,
-    })
-    time.sleep(1)
-    return resp.json()
+    }
+    time.sleep(2)
+    return await hp.fetch_json(url, method="POST", json_data=payload)
 
-@mcp.tool(description="""
-    Generate the plan from the user request. First understand the goal and then it breaks don't into steps to interact with Open Study Builder correctly
-    """)
-def mcp_plan(user_request: str) -> dict:
-    """
-    Takes the user_request.
-    Returns the step-by-step plan List.
-    """
-    # Execute the agent’s workflow
-    results = run_llm_driven_workflow(user_request)
-    time.sleep(1)
-    return results#.json()
 
 # Server startup logging
 logging.info("Starting OSB FastMCP Server via STDIO...")
 
 if __name__ == "__main__":
     logging.info("OSB FastMCP Server is now listening for connections over STDIO.")
-    # Exposes an SSE endpoint at http://127.0.0.1:6274/sse
     mcp.run(transport="stdio")

@@ -1,16 +1,5 @@
 # OSB-MCP (Open Study Builder - Model Context Protocol)
 
-
-## 🔐 Environment Setup
-
-1. Copy `.env.example` to `.env`.
-2. Fill in your API keys and configuration values.
-3. Ensure that `.env` is not committed to version control.
-
-```bash
-cp .env.example .env
-```
-
 ## Overview
 
 OSB-MCP is a multi-agent system that automates the StudyBuilder creation process using Google ADK (Agent Development Kit) agents. The system consists of multiple specialized agents working together to search for information and create StudyBuilder objects in a specified order.
@@ -27,52 +16,29 @@ OSB-MCP is a multi-agent system that automates the StudyBuilder creation process
 - Google API credentials for search functionality
 - Required Python packages (see `requirements.txt`)
 
-## Installation
+## 🔐 Environment Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-organization/osb-mcp.git
-   cd osb-mcp
-   ```
+1. Copy `.env.example` to `.env`.
+2. Fill in your API keys and configuration values.
+3. Ensure that `.env` is not committed to version control.
 
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. Set up Google API credentials:
-   - Create a project in the [Google Cloud Console](https://console.cloud.google.com/)
-   - Enable the required APIs (Search, etc.)
-   - Create API credentials and save them as `credentials.json` in the project root
-
-## Configuration
-
-Configure the system by editing the `config.json` file with your specific parameters:
-
-```json
-{
-  "google_api_key": "YOUR_API_KEY",
-  "search_parameters": {
-    "max_results": 10,
-    "search_depth": 2
-  },
-  "studybuilder": {
-    "creation_order": ["component1", "component2", "component3"]
-  }
-}
+```bash
+cp .env.example .env
 ```
 
-## Running the System
+# [EXECUTE] Ready to step aside and let the Pythonic uv way handle it for you?
+```bash
+uv venv
+source .venv/bin/activate
+uv sync
+uv run adk web # (wait for 30 seconds)
+```
 
-1. Start the main application:
-   ```bash
-   python main.py
-   ```
 
-2. Monitor the agent activity:
-   ```bash
-   python monitor.py
-   ```
+# [EXECUTE] Do you want to go all-in with pip instead?
+```bash
+pip install google-adk google-generativeai mcp python-dotenv nest_asyncio litellm serpapi google-search-results markdown bs4
+```
 
 ## StudyBuilder Creation Process
 
@@ -90,6 +56,96 @@ If you encounter issues:
 1. Check the logs in the `logs/` directory
 2. Verify your Google API credentials are correct and have the necessary permissions
 3. Ensure all required dependencies are installed
+
+
+# Already cooked prompting
+## 🔍 Search on the Internet
+
+**Objective**: Gather background information to inform the study design.
+
+> **Prompt**  
+> _Search for key concepts related to clinical trials for Crohn’s disease, including:_  
+> - Trial structure  
+> - Study groups  
+> - Phases and epochs  
+> - Titration of medications  
+> - Activity scheduling  
+>   
+> Use this information to guide the creation of a realistic and compliant clinical trial model.
+
+---
+
+## 🏗️ Build the Clinical Trial – First, Plan It
+
+### 🧪 Basic Study Design
+
+> **Prompt**  
+> Create a simple sample study for Crohn’s disease. Include:  
+> - 2 Arms  
+> - 2 Epochs  
+> - Study Elements  
+> - Design Cells  
+>   
+> Provide a complete proposal filling all properties accordingly.
+
+---
+
+### 🧪 Advanced Study Design
+
+> **Prompt**  
+> Design a more complex clinical trial for Crohn’s disease. Include:  
+> - 5 Arms  
+> - 5 Epochs  
+> - 5 Elements  
+> - Corresponding Design Cells  
+>   
+> Provide a comprehensive structure with all fields populated.
+
+---
+
+## 📅 Define the Schedule and Activities
+
+### 📆 Study Visit Activity Schedule
+
+> **Prompt**  
+>Create a new study and detailed visit and activity schedule.
+>Suggest and justify appropriate input data for:
+>
+>Visit timing
+>Visit frequency
+>Associated activities
+>
+>do what is needed to create it, do your best suggestion to set the properties
+
+---
+
+### ✅ Define Study Activities
+
+> **Prompt**  
+> Create a study activity configuration for `Study_000002`.  
+> Suggest the input parameters including:  
+> - Activity name  
+> - Description  
+> - Timing  
+> - Assigned roles
+
+---
+
+
+
+# UPGRADE libraries
+
+```bash
+# remove venv
+# remove toml
+uv init
+uv venv
+uv pip install google-adk google-generativeai mcp python-dotenv nest_asyncio litellm serpapi google-search-results markdown bs4
+uv pip freeze > requirements.txt
+uv add -r requirements.txt
+uv sync
+uv lock
+```
 
 ## License
 
