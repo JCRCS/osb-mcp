@@ -40,7 +40,7 @@ def get_studies() -> dict:
     - dict: A dictionary containing all studies metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies?page_number=1&page_size=0")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="""BEFORE creating a study execute GET studies to generate unique properties. Create a new study in the Open Study Builder (OSB). BEFORE GET studies to generate unique properties
@@ -77,7 +77,7 @@ async def create_study( study_acronym:str, study_number: str) -> dict:
         "study_number": study_number
     })
     # await asyncio.sleep(1000)
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -90,7 +90,23 @@ def fetch_arm_control_terminology() -> dict:
     - dict: A dictionary containing all arm types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Arm+Type")
-    time.sleep(1)
+    time.sleep(5)
+    return resp.json()
+
+
+@mcp.tool(description="""Retrieve a list of study arms from the Open Study Builder (OSB) API. 
+          get arm as arm type uid and the arm_name to so it can be used""")
+def get_study_arms(
+        study_uid:str,
+) -> dict:
+    """
+    Fetches all studies from the Open Study Builder.
+
+    Returns:
+    - dict: A dictionary containing all studies metadata.
+    """
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-arms?page_size=0")
+    time.sleep(5)
     return resp.json()
 
 
@@ -126,7 +142,7 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
         "number_of_subjects": number_of_subjects,
         "arm_type_uid": arm_type_uid
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -146,7 +162,7 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
 #     - term_uid and sponsor_preferred_name
 #     """
 #     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Visit+Contact+Mode")
-#     time.sleep(1)
+#     time.sleep(5)
 #     return resp.json()
 
 
@@ -167,7 +183,7 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
 #     - term_uid and sponsor_preferred_name
 #     """
 #     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Repeating+Visit+Frequency")
-#     time.sleep(1)
+#     time.sleep(5)
 #     return resp.json()
 
 
@@ -189,7 +205,7 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
 #     - term_uid and sponsor_preferred_name
 #     """
 #     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Allocation")
-#     time.sleep(1)
+#     time.sleep(5)
 #     return resp.json()
 
 
@@ -205,7 +221,7 @@ def get_study_epochs(
     - dict: A dictionary containing all studies metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-epochs?page_size=0")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -221,7 +237,7 @@ def get_study_visits(
     - dict: A dictionary containing all studies metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-visits?page_size=50&sort_by=%7B%22order%22:false%7D")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="""
@@ -240,7 +256,7 @@ def fetch_visit_type_control_terminology() -> dict:
     - term_uid and sponsor_preferred_name
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms/names?page_size=0&codelist_name=VisitType")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -261,7 +277,7 @@ def fetch_time_point_reference_control_terminology() -> dict:
     - term_uid and sponsor_preferred_name
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Time+Point+Reference")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="""
@@ -326,7 +342,7 @@ def preview_visit(
         "visit_contact_mode_uid":"CTTerm_000079",
         "time_unit_uid":"UnitDefinition_000365",
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -405,7 +421,7 @@ def create_visit(
             "description":description,
             "time_unit_uid":time_unit_uid,
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -418,7 +434,7 @@ def fetch_epoch_control_terminology() -> dict:
     - dict: A dictionary containing all epoch metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/epochs/allowed-configs")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="Retrieve a list of sub types of epochs from the Open Study Builder (OSB) API.")
@@ -430,7 +446,7 @@ def fetch_epoch_sub_type_control_terminology() -> dict:
     - dict: A dictionary containing all epoch types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Epoch+Sub+Type")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -456,7 +472,7 @@ def preview_epoch(
             "study_uid":study_uid,
             "epoch_subtype":epoch_subtype,
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -506,7 +522,7 @@ def create_epoch(
             "duration":duration,
             "color_hash":color_hash,
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -576,7 +592,7 @@ def fetch_activity_type_terminology() -> dict:
     - dict: A dictionary containing all activity type metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/concepts/activities/activities?library_name=Sponsor&page_number=1&page_size=10&filters=%7B%22%2A%22%3A%7B%20%22v%22%3A%20%5B%22%22%5D%2C%20%22op%22%3A%20%22co%22%7D%7D&operator=and&total_count=false")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -589,7 +605,7 @@ def fetch_soa_group_control_terminology() -> dict:
     - dict: A dictionary containing all activity types metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Flowchart+Group")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="Retrieve a list of study activities from the Open Study Builder (OSB) API. get the activity name, the activity group uid and the activity sub group uid to check uniqueness")
@@ -603,7 +619,7 @@ def get_study_activities(
     - dict: A dictionary containing all studies metadata.
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activities?page_size=0")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description=""" 
@@ -681,7 +697,7 @@ def create_study_activity(
     }
     ]
     resp = httpx.post(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activities/batch",json=payload)
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -693,8 +709,8 @@ def fetch_element_control_terminology() -> dict:
     Returns:
     - dict: A dictionary containing all element types metadata.
     """
-    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/ct/terms?page_size=100&sort_by=%7B%22name.sponsor_preferred_name%22:true%7D&codelist_name=Element+Type")
-    time.sleep(1)
+    resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/study-elements/allowed-element-configs")
+    time.sleep(5)
     return resp.json()
 
 
@@ -739,7 +755,7 @@ def create_element(study_uid,
         "element_colour": element_colour,
         "element_subtype_uid": element_subtype_uid,
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -758,7 +774,7 @@ def get_activity_schedule(study_uid,
     
     """
     resp = httpx.get(f"{OPEN_STUDY_BUILDER_URL}/studies/{study_uid}/study-activity-schedules?operational=false")
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="First get_activity_schedule inorder to create. Create a new study visit activity schedule in the Open Study Builder (OSB). Make sure that first you have the study visit activity, study visit ")
@@ -785,7 +801,7 @@ def create_activity_schedule(study_uid,
         "study_activity_uid":study_activity_uid,
         "study_visit_uid":study_visit_uid
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 
@@ -822,7 +838,7 @@ def create_design_cell(study_uid,
         "transition_rule":  transition_rule,
         "order": order,
     })
-    time.sleep(1)
+    time.sleep(5)
     return resp.json()
 
 @mcp.tool(description="""
@@ -835,7 +851,7 @@ def mcp_plan(user_request: str) -> dict:
     """
     # Execute the agent’s workflow
     results = run_llm_driven_workflow(user_request)
-    time.sleep(1)
+    time.sleep(5)
     return results#.json()
 
 # Server startup logging

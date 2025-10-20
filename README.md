@@ -1,6 +1,7 @@
 # OSB-MCP (Open Study Builder - Model Context Protocol)
 
 
+
 ## 🔐 Environment Setup
 
 1. Copy `.env.example` to `.env`.
@@ -9,6 +10,22 @@
 
 ```bash
 cp .env.example .env
+```
+
+
+
+# Do you want to go all-in with pip?
+```bash
+pip install google-adk==0.3.0 google-generativeai mcp python-dotenv nest_asyncio litellm serpapi google-search-results markdown bs4
+```
+
+# Do you want to lay off your self and do the pythonic uv way? 
+#pwd ./osb-mcp/
+```bash
+uv venv .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+adk web 
 ```
 
 ## Overview
