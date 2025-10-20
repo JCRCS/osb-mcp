@@ -118,13 +118,14 @@ def create_arm(study_uid, name, short_name, code, description, color, randomizat
     Parameters:
     - study_uid: study where it's the arm that the user wants to create
     - study_data (dict): The study arm to be created. Must follow the Open Study Builder schema.
+    - randomization_group: e.g. "Treatment", "Control" Should be unique in the study arms
     * {
             "name": "string",
             "short_name": "string",
             "code": "string",
             "description": "string",
             "arm_colour": "string",
-            "randomization_group": "string and should be unique",
+            "randomization_group": "string",
             "number_of_subjects": 0,
             "arm_type_uid": "string"
         }
@@ -498,8 +499,8 @@ def create_epoch(
             "study_uid": "string",
             "start_rule": "string",
             "end_rule": "string",
-            "epoch": "string epoch uid control terminology ",
-            "epoch_subtype": "string epoch subtype uid control terminology",
+            "epoch": "uid epoch control terminology ",
+            "epoch_subtype": "uid epoch subtype control terminology",
             "duration_unit": "string",
             "order": 0,
             "description": "string",
