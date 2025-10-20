@@ -6,6 +6,7 @@ from requests.exceptions import HTTPError
 from .task_steps import (
     create_study,
     create_study_arm,
+    get_study_arms,
     preview_epoch,
     create_epoch,
     create_element,
@@ -18,7 +19,7 @@ from .task_steps import (
     fetch_time_point_reference_control_terminology,
     fetch_visit_control_terminology,
     get_study_visits,
-    get_study_epoch,
+    get_study_epochs,
     fetch_soa_group_control_terminology,
     fetch_study_activity,
     create_study_activity,
@@ -37,13 +38,14 @@ class TaskExecutor:
     def __init__(self):
         self.steps = {
             "create_study": create_study,
+            "get_study_arms": get_study_arms,
             "create_study_arm": create_study_arm,
             "create_visit":create_visit,
             "preview_visit":preview_visit,
             "fetch_time_point_reference_control_terminology":fetch_time_point_reference_control_terminology,
             "fetch_visit_control_terminology":fetch_visit_control_terminology,
             "get_study_visits":get_study_visits,
-            "get_study_epoch":get_study_epoch,
+            "get_study_epochs":get_study_epochs,
             "preview_epoch": preview_epoch,
             "create_epoch": create_epoch,
             "create_study_activity": create_study_activity,

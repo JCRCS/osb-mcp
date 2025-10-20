@@ -5,11 +5,22 @@ def create_study(context: dict) -> dict:
     study = {"study_id": "STU123"}
     return {"study": study}
 
+def get_study_arms(context: dict) -> dict:
+    study = context.get("study", {})
+    # e.g. POST /studies/{id}/arms
+    arms = [{"arm_id": "ARM1"}, {"arm_id": "ARM2"}]
+    return {"arms": arms}
+
 def create_study_arm(context: dict) -> dict:
     study = context.get("study", {})
     # e.g. POST /studies/{id}/arms
     arms = [{"arm_id": "ARM1"}, {"arm_id": "ARM2"}]
     return {"arms": arms}
+
+def get_study_epochs(context: dict) -> dict:
+    study = context.get("study", {})
+    epochs = [{"epoch_id": "E1"}]
+    return {"epochs": epochs}
 
 def create_epoch(context: dict) -> dict:
     study = context.get("study", {})

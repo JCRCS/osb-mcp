@@ -35,6 +35,7 @@ AVAILABLE_TASKS = [
     {"name": "get_study_visits", "description": "get study visits to check uniqueness in timeline."},
     {"name": "get_activity_schedule", "description": "get study visits activity schedules to check uniqueness in timeline."},
     {"name": "get_study_epochs", "description": "get study epochs to check uniqueness."},
+    {"name": "get_study_arms", "description": "get study arms to check uniqueness."},
 ]
 
 

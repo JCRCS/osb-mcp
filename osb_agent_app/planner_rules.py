@@ -10,6 +10,7 @@ PLANNER_RULES = {
     "create_study": ["create_study"],
     "create_study_arm": ["create_study_arm"],
     "create_epoch": ["create_epoch"],
+    "get_study_arms": ["get_study_arms"],
     "create_study_activity": ["create_study_activity"],
     "get_study_activity": ["get_study_activity"],
     "preview_epoch": ["preview_epoch"],
@@ -24,7 +25,7 @@ PLANNER_RULES = {
     "fetch_time_point_reference_control_terminology": ["fetch_time_point_reference_control_terminology"],
     "get_activity_schedule": ["get_activity_schedule"],
     "get_study_visits": ["get_study_visits"],
-    "get_study_epoch": ["get_study_epoch"],
+    "get_study_epochs": ["get_study_epochs"],
 
     "fetch_arm_control_terminology": ["fetch_arm_control_terminology"],
     "fetch_epoch_control_terminology": ["fetch_epoch_control_terminology"],
@@ -36,9 +37,9 @@ PLANNER_RULES = {
 # Define dependencies between high-level goals.
 TASK_DEPENDENCIES = {
     "create_study":["get_studies"],
-    "create_study_arm": ["create_study","fetch_arm_control_terminology"],
+    "create_study_arm": ["create_study","fetch_arm_control_terminology","get_study_arms"],
     "preview_epoch": ["create_study", "fetch_epoch_control_terminology"],
-    "create_epoch": ["create_study", "fetch_epoch_control_terminology","preview_epoch"],
+    "create_epoch": ["create_study", "fetch_epoch_control_terminology","get_study_epochs","preview_epoch"],
     "create_design_cell": [
         "create_study",
         "create_study_arm",

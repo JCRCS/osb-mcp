@@ -10,6 +10,7 @@ AGENT_DESCRIPTOR = {
     "tools": [
         {"name": "create_study", "description": "Creates a new clinical study record."},
         {"name": "get_study", "description": "Get the study by the study_uid"},
+        {"name": "get_study_arms", "description": "get study arm that exists."},
         {"name": "create_study_arm", "description": "Adds study arms to a study."},
         {"name": "preview_epoch", "description": "Defines study epochs."},
         {"name": "create_epoch", "description": "Defines study epochs."},
